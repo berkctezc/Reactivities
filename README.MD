@@ -1,4 +1,4 @@
-# NET 5.0 & React App Project
+# NET 5.0 & React 17 App Project
 
 This is a project for learning purposes named Reactivities.
 
@@ -13,4 +13,29 @@ This is a project for learning purposes named Reactivities.
 - troubleshooting debugging problems: downgrade c# extension, in settings, "omnisharp.useGlobalMono": "always", "omnisharp.path": "latest"
 
 ### Clean Architecture
+
+(API=>(Application=>(Persistence=>(Domain)))
+
+*WIP*
+
+### API - Walking Skeleton
+
+- Create a API and 3 Class libraries named Application, Domain, Persistence
+- References should be like Persistence: Domain | Application: Persistence, Domain
+- **DataContext** for EF Core
+
+```cs
+namespace Persistence{
+    public class DataContext : DbContext {
+        public DataContext(DbContextOptions options) : base(options){}
+        public DbSet<Activity> Activities { get; set; }
+    }
+}
+```
+
+- Create migration with dotnet ef
+
+```bash
+dotnet ef migrations add InitialCreate -p Persistence -s API
+```
 
