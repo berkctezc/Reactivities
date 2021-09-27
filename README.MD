@@ -20,8 +20,8 @@ This is a project for learning purposes named Reactivities.
 
 ### API - Walking Skeleton
 
-- Create a API and 3 Class libraries named Application, Domain, Persistence
-- References should be like Persistence: Domain | Application: Persistence, Domain
+- Create a API and 3 Class libraries named **Application**, **Domain**, **Persistence**
+- References should be like **Persistence**: Domain | **Application**: Persistence, Domain
 - **DataContext** for EF Core
 
 ```cs
@@ -33,9 +33,21 @@ namespace Persistence{
 }
 ```
 
-- Create migration with dotnet ef
+- Create migration with **dotnet ef**
 
 ```bash
 dotnet ef migrations add InitialCreate -p Persistence -s API
 ```
+
+- Add seed data to persistence and run migrations and seed operation on Program.cs
+
+### Client - Walking Skeleton
+
+- Create React App
+
+```bash
+npx create-react-app client-app --use-npm --template typescript
+```
+
+- **npm start** to run the react project
 
