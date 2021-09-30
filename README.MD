@@ -16,8 +16,6 @@ This is a project for learning purposes named Reactivities.
 
 (API=>(Application=>(Persistence=>(Domain)))
 
-*WIP*
-
 ### API - Walking Skeleton
 
 - Create a API and 3 Class libraries named **Application**, **Domain**, **Persistence**
@@ -92,8 +90,7 @@ export default App;
 - Add Cors Policy to API Startup
 
 ```cs
-        public void ConfigureServices(IServiceCollection services)
-        {
+        public void ConfigureServices(IServiceCollection services){
 			//...
             services.AddCors(opt =>
             {
@@ -103,13 +100,12 @@ export default App;
                 });
             });
         }
- public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
+ public void Configure(IApplicationBuilder app, IWebHostEnvironment env){
            //app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseAuthorization();
-		   //...
+		   //... 
         }
 ```
 
@@ -132,4 +128,44 @@ export default App;
   );
 }
 ```
+
+## 2 - CQRS and Mediator Pattern
+
+- Install **Mediatr.Extensions.Microsoft.DependencyInjection** to **Application** layer
+- Install **Mediatr** in **API** layer
+- Create query and handler in Application layer
+
+```cs
+public class List
+{
+    public class Query : IRequest<List<Activity>> { }
+
+    public class Handler : IRequestHandler<Query, List<Activity>>
+    {
+        private readonly DataContext _context;
+
+        public Handler(DataContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<Activity>> Handle(Query request, CancellationToken cancellationToken)
+        {
+            return await _context.Activities.ToListAsync(cancellationToken: cancellationToken);
+        }
+    }
+}
+```
+
+- Update controller. Inject IMediator and
+
+```cs
+[HttpGet]
+public async Task<ActionResult<List<Activity>>> GetActivities()
+{
+    return await _mediator.Send(new List.Query());
+}
+```
+
+- Add `services.AddMediatR(typeof(List.Handler).Assembly);` to **Startup ConfigureServices**
 
