@@ -169,3 +169,224 @@ public async Task<ActionResult<List<Activity>>> GetActivities()
 
 - Add `services.AddMediatR(typeof(List.Handler).Assembly);` to **Startup ConfigureServices**
 
+- To thin controllers, inject IMediator in **BaseApiController** and remove **ctor** from individual controllers
+
+```cs
+   [ApiController]
+    [Route("api/[controller]")]
+    public class BaseApiController : ControllerBase
+    {
+        private IMediator _mediator;
+        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+    }
+```
+
+- and use like this
+
+```cs
+[HttpGet]
+public async Task<ActionResult<List<Activity>>> GetActivities()
+{
+    return await Mediator.Send(new List.Query());
+}
+```
+
+### Adding other handlers
+
+- Details
+
+```cs
+namespace Application.Activities
+{
+    public class Details
+    {
+        public class Query : IRequest<Activity>
+        {
+            public Guid Id { get; set; }
+        }
+        public class Handler : IRequestHandler<Query, Activity>
+        {
+            private readonly DataContext _context;
+
+            public Handler(DataContext context)
+            {
+                _context = context;
+            }
+
+            public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+            {
+                return await _context.Activities.FindAsync(request.Id);
+            }
+        }
+    }
+}
+//...
+namespace API.Controllers
+{
+    public class ActivitiesController : BaseApiController
+    {
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Activity>> GetActivity(Guid id)
+        {
+            return await Mediator.Send(new Details.Query() { Id = id });
+        }
+    }
+}
+```
+
+- Create
+
+```cs
+namespace Application.Activities
+{
+    public class Create
+    {
+        public class Command : IRequest
+        {
+            public Activity Activity { get; set; }
+        }
+        public class Handler : IRequestHandler<Command>
+        {
+            private readonly DataContext _context;
+
+            public Handler(DataContext context)
+            {
+                _context = context;
+            }
+            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            {
+                await _context.Activities.AddAsync(request.Activity, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                return Unit.Value;
+            }
+        }
+    }
+}
+//...
+namespace API.Controllers
+{
+    public class ActivitiesController : BaseApiController
+    {
+        [HttpPost]
+        public async Task<IActionResult> CreateActivity(Activity activity)
+        {
+            return Ok(await Mediator.Send(new Create.Command { Activity = activity }));
+        }
+    }
+}
+```
+
+- Edit
+
+```cs
+namespace Application.Activities
+{
+    public class Edit
+    {
+        public class Command : IRequest
+        {
+            public Activity Activity { get; set; }
+        }
+        public class Handler : IRequestHandler<Command>
+        {
+            private readonly DataContext _context;
+            private readonly IMapper _mapper;
+
+            public Handler(DataContext context, IMapper mapper)
+            {
+                _context = context;
+                _mapper = mapper;
+            }
+
+            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var activityToUpdate = await _context.Activities.FindAsync(request.Activity.Id);
+                _mapper.Map(request.Activity, activityToUpdate);
+                await _context.SaveChangesAsync(cancellationToken);
+                return Unit.Value;
+            }
+        }
+    }
+}
+//...
+namespace API.Controllers
+{
+    public class ActivitiesController : BaseApiController
+    {
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditActivity(Guid id, Activity activity)
+        {
+            activity.Id = id;
+            return Ok(await Mediator.Send(new Edit.Command { Activity = activity }));
+        }
+    }
+}
+
+```
+
+- Delete
+
+```cs
+namespace Application.Activities
+{
+    public class Delete
+    {
+        public class Command : IRequest
+        {
+            public Guid Id { get; set; }
+        }
+
+        public class Handler : IRequestHandler<Command>
+        {
+            private readonly DataContext _context;
+            private readonly IMapper _mapper;
+
+            public Handler(DataContext context, IMapper mapper)
+            {
+                _context = context;
+                _mapper = mapper;
+            }
+
+            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var activityToDelete = await _context.Activities.FindAsync(request.Id);
+                _context.Remove(activityToDelete);
+                await _context.SaveChangesAsync(cancellationToken);
+                return Unit.Value;
+            }
+        }
+    }
+}
+//...
+namespace API.Controllers
+{
+    public class ActivitiesController : BaseApiController
+    {
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteActivity(Guid id)
+        {
+            return Ok(await Mediator.Send(new Delete.Command { Id = id }));
+        }
+    }
+}
+```
+
+### Adding AutoMapper
+
+- Install AutoMapper `AutoMapper.Extensions.Microsoft.DependencyInjection` to Application layer
+- Create MappingProfile in Application Layer, Core folder
+
+```cs
+namespace Application.Core
+{
+    public class MappingProfiles : Profile
+    {
+        public MappingProfiles()
+        {
+            CreateMap<Activity, Activity>();
+        }
+    }
+}
+```
+
+- And in **Startup.cs** add `services.AddAutoMapper(typeof(MappingProfiles).Assembly);` to **ConfigureServices**
