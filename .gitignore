@@ -388,3 +388,4 @@ FodyWeavers.xsd
 *.sln.iml
 /API/reactivites.db-shm
 /API/reactivites.db-wal
+client-app/public/assets/Thumbs.db
