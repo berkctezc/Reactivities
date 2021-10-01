@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Header, List } from 'semantic-ui-react';
+import { Container } from 'semantic-ui-react';
 import { Activity } from "../models/activity";
 import NavBar from "./NavBar";
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
@@ -37,7 +37,7 @@ function App() {
   return (
     <>
       <NavBar openForm={handleFormOpen} />
-      <Container style={{ marginTop: "7em" }}>
+      <Container style={{ marginTop: "5em" }}>
         <ActivityDashboard
           activities={activities}
           selectedActivity={selectedActivity}

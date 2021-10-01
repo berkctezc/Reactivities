@@ -1,5 +1,4 @@
 export interface Activity {
-    map(arg0: (activity: any) => JSX.Element): import("react").ReactNode;
     id: string;
     title: string;
     date: Date;
