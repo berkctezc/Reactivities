@@ -426,3 +426,5 @@ namespace API.Extensions
 ```
 
 - Remove these lines from Startup, ConfigureService and add `services.AddApplicationServices(_config);`
+
+### React
