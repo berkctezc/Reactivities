@@ -52,7 +52,7 @@ npx create-react-app client-app --use-npm --template typescript
 - `npm install axios`
 - Make a request to API using **axios**
 
-```react
+```tsx
 import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
@@ -73,10 +73,8 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <ul>
-          {activities.map((activity:any)=>(
-            <li key={activity.id}>
-              {activity.title}
-            </li>
+          {activities.map((activity: any) => (
+            <li key={activity.id}>{activity.title}</li>
           ))}
         </ul>
       </header>
@@ -113,7 +111,7 @@ export default App;
 - Import in index.ts `import 'semantic-ui-css/semantic.min.css'`
 - Use Semantic UI elements instead of built-in ones in App.tsx
 
-```react
+```tsx
   return (
     <div>
       <Header as='h2' icon='users' content='Reactivities'/>
@@ -327,28 +325,22 @@ namespace API.Controllers
 - Delete
 
 ```cs
-namespace Application.Activities
-{
-    public class Delete
-    {
-        public class Command : IRequest
-        {
+namespace Application.Activities{
+    public class Delete{
+        public class Command : IRequest{
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
-        {
+        public class Handler : IRequestHandler<Command>{
             private readonly DataContext _context;
             private readonly IMapper _mapper;
 
-            public Handler(DataContext context, IMapper mapper)
-            {
+            public Handler(DataContext context, IMapper mapper){
                 _context = context;
                 _mapper = mapper;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-            {
+            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken){
                 var activityToDelete = await _context.Activities.FindAsync(request.Id);
                 _context.Remove(activityToDelete);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -358,13 +350,10 @@ namespace Application.Activities
     }
 }
 //...
-namespace API.Controllers
-{
-    public class ActivitiesController : BaseApiController
-    {
+namespace API.Controllers{
+    public class ActivitiesController : BaseApiController{
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteActivity(Guid id)
-        {
+        public async Task<IActionResult> DeleteActivity(Guid id){
             return Ok(await Mediator.Send(new Delete.Command { Id = id }));
         }
     }
@@ -377,12 +366,9 @@ namespace API.Controllers
 - Create MappingProfile in Application Layer, Core folder
 
 ```cs
-namespace Application.Core
-{
-    public class MappingProfiles : Profile
-    {
-        public MappingProfiles()
-        {
+namespace Application.Core{
+    public class MappingProfiles : Profile{
+        public MappingProfiles(){
             CreateMap<Activity, Activity>();
         }
     }
@@ -402,18 +388,14 @@ namespace API.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddSwaggerGen(c =>
-            {
+            services.AddSwaggerGen(c =>{
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-            services.AddDbContext<DataContext>(opt =>
-            {
+            services.AddDbContext<DataContext>(opt =>{
                 opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
-            services.AddCors(opt =>
-            {
-                opt.AddPolicy("CorsPolicy", policy =>
-                {
+            services.AddCors(opt =>            {
+                opt.AddPolicy("CorsPolicy", policy =>{
                     policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
                 });
             });
@@ -430,3 +412,66 @@ namespace API.Extensions
 ### React
 
 ### Axios
+
+### MobX
+
+- `npm install mobx mobx-react-lite`
+- Create a folder named stores - for storing stores in one central location
+- Create class activityStore.ts in folder store
+
+```tsx
+export default class ActivitStore {
+  title = "Hello from MobX!";
+
+  constructor() {
+    makeObservable(this, {
+      title: observable,
+    });
+  }
+}
+```
+
+```tsx
+- Create an interface store
+
+import { createContext, useContext } from 'react';
+import ActivitStore from './activityStore';
+interface Store {
+    activityStore: ActivitStore
+}
+
+export const store: Store = {
+    activityStore: new ActivitStore()
+}
+
+export const StoreContext = createContext(store);
+
+export function useStore() {
+    return useContext(StoreContext);
+}
+```
+
+- Provide context to our application in index.tsx
+
+```tsx
+<StoreContext.Provider value={store}>
+  <App />
+</StoreContext.Provider>
+```
+
+- Add activityStore to App.tsx and access it in function
+
+```tsx
+function App() {
+  const { activityStore } = useStore();
+  //...
+   return (
+    <>
+      <NavBar openForm={handleFormOpen} />
+      <Container style={{ marginTop: "5em" }}>
+...
+        <h2>{activityStore.title}</h2>
+      </Container>
+    </>
+  );
+```
