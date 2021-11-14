@@ -1,4 +1,4 @@
-# NET 5.0 & React 17 App Project
+# NET 6.0 & React 17 App Project
 
 This is a project for learning purposes named Reactivities.
 
@@ -105,7 +105,7 @@ export default App;
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseAuthorization();
-		   //... 
+		   //...
         }
 ```
 
@@ -429,7 +429,4 @@ namespace API.Extensions
 
 ### React
 
-
-
 ### Axios
-
