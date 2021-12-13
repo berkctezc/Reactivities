@@ -662,3 +662,267 @@ export default class ActivityStore {
 }
 ```
 
+#### Selecting an activity using MobX and strict mode
+
+- Big changes
+- **App.tsx**
+
+```tsx
+function App() {
+  const { activityStore } = useStore();
+
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [setSelectedActivity] = useState<Activity | undefined>(undefined);
+  const [setEditMode] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    activityStore.loadActivities();
+  }, [activityStore]);
+
+  function handleCreateOrEditActivity(activity: Activity) {
+    setSubmitting(true);
+    if (activity.id) {
+      agent.Activities.update(activity).then(() => {
+        setActivities([...activities.filter(x => x.id !== activity.id), activity]);
+        setSubmitting(false);
+      })
+    } else {
+      activity.id = uuid();
+      agent.Activities.create(activity).then(() => {
+        setActivities([...activities, activity]);
+        setSubmitting(false);
+      })
+    }
+  }
+
+  function handleDeleteActivity(id: string) {
+    setSubmitting(true);
+    agent.Activities.delete(id).then(() => {
+      setActivities([...activities.filter(x => x.id !== id)]);
+      setSubmitting(false);
+    })
+  }
+
+  if (activityStore.loadingInitial) return <LoadingComponent content="Loading app" />
+
+  return (
+    <>
+      <NavBar />
+      <Container style={{ marginTop: "5em" }}>
+        <ActivityDashboard
+          activities={activityStore.activities}
+          createOrEdit={handleCreateOrEditActivity}
+          deleteActivity={handleDeleteActivity}
+          submitting={submitting}
+        />
+      </Container>
+    </>
+  );
+}
+
+export default observer(App);
+```
+
+- Navbar.tsx
+
+```tsx
+export default function NavBar() {
+
+    const { activityStore } = useStore();
+
+    return (
+        <Menu inverted fixed="top">
+            <Container>
+                <Menu.Item header>
+                    <img src="/assets/logo.png" alt="logo" style={{ marginRight: '10px' }} />
+                    Reactivities
+                </Menu.Item>
+                <Menu.Item name="Activities" />
+                <Menu.Item>
+                    <Button onClick={() => activityStore.openForm()} positive content='Create Activity' />
+                </Menu.Item>
+            </Container>
+        </Menu>
+    );
+}
+```
+
+- activityStore.ts
+
+```ts
+export default class ActivityStore {
+    activities: Activity[] = [];
+    selectedActivity: Activity | undefined = undefined;
+    editMode = false;
+    loading = false;
+    loadingInitial = false;
+
+    constructor() {
+        makeAutoObservable(this)
+    }
+
+    loadActivities = async () => {
+        this.setLoadingInitial(true);
+        try {
+            const activities = await agent.Activities.list();
+            activities.forEach(activity => {
+                activity.date = activity.date.split('T')[0];
+                this.activities.push(activity);
+            })
+            this.setLoadingInitial(false);
+        } catch (error) {
+            console.log(error);
+            this.setLoadingInitial(false);
+
+        }
+    }
+    setLoadingInitial = (state: boolean) => {
+        this.loadingInitial = state;
+    }
+    selectActivity = (id: string) => {
+        this.selectedActivity = this.activities.find(a => a.id === id);
+    }
+    cancelSelectedActivity = () => {
+        this.selectedActivity = undefined;
+    }
+    openForm = (id?: string) => {
+        id ? this.selectActivity(id) : this.cancelSelectedActivity();
+        this.editMode = true;
+    }
+    closeForm = () => {
+        this.editMode = false;
+    }
+}
+```
+
+- ActivityDashboard.tsx
+
+```tsx
+interface Props {
+    activities: Activity[];
+    createOrEdit: (activity: Activity) => void;
+    deleteActivity: (id: string) => void;
+    submitting: (boolean);
+}
+
+export default observer(function ActivityDashboard({ activities, deleteActivity, createOrEdit, submitting }: Props) {
+
+    const { activityStore } = useStore();
+    const { selectedActivity, editMode } = activityStore;
+
+    return (
+        <Grid>
+            <Grid.Column width='10'>
+                <ActivityList activities={activities}
+                    deleteActivity={deleteActivity}
+                    submitting={submitting}
+                />
+            </Grid.Column>
+            <Grid.Column width='6'>
+                {
+                    selectedActivity
+                    &&
+                    !editMode
+                    &&
+                    <ActivityDetails />
+                }
+                {editMode &&
+                    <ActivityForm
+                        createOrEdit={createOrEdit}
+                        submitting={submitting}
+                    />
+                }
+            </Grid.Column>
+        </Grid>
+    )
+})
+```
+
+- ActivityList.tsx
+
+```tsx
+interface Props {
+    activities: Activity[];
+    createOrEdit: (activity: Activity) => void;
+    deleteActivity: (id: string) => void;
+    submitting: (boolean);
+}
+
+export default observer(function ActivityDashboard({ activities, deleteActivity, createOrEdit, submitting }: Props) {
+
+    const { activityStore } = useStore();
+    const { selectedActivity, editMode } = activityStore;
+
+    return (
+        <Grid>
+            <Grid.Column width='10'>
+                <ActivityList activities={activities}
+                    deleteActivity={deleteActivity}
+                    submitting={submitting}
+                />
+            </Grid.Column>
+            <Grid.Column width='6'>
+                {
+                    selectedActivity
+                    &&
+                    !editMode
+                    &&
+                    <ActivityDetails />
+                }
+                {editMode &&
+                    <ActivityForm
+                        createOrEdit={createOrEdit}
+                        submitting={submitting}
+                    />
+                }
+            </Grid.Column>
+        </Grid>
+    )
+})
+```
+
+- ActivityDetailst.tsx
+
+```tsx
+export default function ActivityDetails() {
+    const { activityStore } = useStore();
+    const { selectedActivity: activity, openForm, cancelSelectedActivity } = activityStore;
+
+    if (!activity) return <LoadingComponent content={''} />;
+
+    return (
+        <Card fluid>
+            <Image src={`/assets/categoryImages/${activity.category}.jpg`} />
+            <Card.Content>
+                <Card.Header>
+                    {activity.title}
+                </Card.Header>
+                <Card.Meta>
+                    <span>{activity.date}</span>
+                </Card.Meta>
+                <Card.Description>
+                    {activity.description}
+                </Card.Description>
+            </Card.Content>
+            <Card.Content>
+                <Button.Group widths='2'>
+                    <Button onClick={() => openForm(activity.id)} basic color='blue' content='edit' />
+                    <Button onClick={cancelSelectedActivity} basic color='grey' content='cancel' />
+                </Button.Group>
+            </Card.Content>
+        </Card>
+    )
+}
+```
+
+- ActivityForm.tsx
+
+```tsx
+export default function ActivityForm({ createOrEdit, submitting }: Props) {
+    const { activityStore } = useStore();
+    const { selectedActivity, closeForm } = activityStore;
+    //...
+}
+```
+
