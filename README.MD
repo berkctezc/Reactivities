@@ -587,7 +587,7 @@ function App() {
 
 #### MobX actions
 
-- Add action to activityStore, also changed makeObservable to makeAutoObservable. It detects properties and makes them observable, and detects functions to make them actions.
+- Add action to **activityStore**, also changed makeObservable to makeAutoObservable. It detects properties and makes them observable, and detects functions to make them actions.
 
 ```ts
 constructor() {
@@ -598,12 +598,67 @@ setTitle = () => {
     }
 ```
 
-- Using in view
+- Using in view (**App.tsx**)
 
-```ts
+```tsx
 <!--...-->
 <Button content='Add exclamation!' positive onClick={activityStore.setTitle}></Button>
 
 export default observer(App);
+```
+
+#### Refactoring code for MobX
+
+- Moved activities variable and logic from state of the component to store. 
+- **App.tsx**
+
+```tsx
+  useEffect(() => {
+    activityStore.loadActivities();
+  }, [activityStore]);
+<!--...-->
+  return (
+    <>
+      <NavBar openForm={handleFormOpen} />
+      <Container style={{ marginTop: "5em" }}>
+        <ActivityDashboard
+          activities={activityStore.activities}
+        />
+    <!--...-->
+      </Container>
+    </>
+  );
+}
+
+export default observer(App);
+```
+
+- **activityStore.ts**
+
+```ts
+export default class ActivityStore {
+    activities: Activity[] = [];
+    selectedActivity: Activity | null = null;
+    editMode = false;
+    loading = false;
+    loadingInitial = false;
+    constructor() {
+        makeAutoObservable(this)
+    }
+    loadActivities = async () => {
+        this.loadingInitial = true;
+        try {
+            const activities = await agent.Activities.list();
+            activities.forEach(activity => {
+                activity.date = activity.date.split('T')[0];
+                this.activities.push(activity);
+            })
+            this.loadingInitial = false;
+        } catch (error) {
+            console.log(error);
+            this.loadingInitial = false;
+        }
+    }
+}
 ```
 
