@@ -89,7 +89,7 @@ export default App;
 
 ```cs
         public void ConfigureServices(IServiceCollection services){
-			//...
+   //...
             services.AddCors(opt =>
             {
                 opt.AddPolicy("CorsPolicy", policy =>
@@ -103,7 +103,7 @@ export default App;
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseAuthorization();
-		   //...
+     //...
         }
 ```
 
@@ -409,11 +409,120 @@ namespace API.Extensions
 
 - Remove these lines from Startup, ConfigureService and add `services.AddApplicationServices(_config);`
 
-### React
+## 3 - React
 
-### Axios
+### Folder structure in react
 
-### MobX
+- React does not make you use a predefined structure. You are completely free but you should use some structure for everyone's sanity
+- We are going to use feature based structure
+
+```bash
+src/
+	app/ #not specific to any feature
+		layout/
+			App.tsx
+			styles.css
+	features/
+
+```
+
+_don't forget to update imports_
+
+### Adding an Activity Interface
+
+- Copy Swagger activity get response and convert it by using json to ts tool
+
+```ts
+export interface Activity {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  category: string;
+  city: string;
+  venue: string;
+}
+```
+
+- Add type to activities useState `const [activities, setActivities] = useState<Activity[]>([]);`
+- remove any from map function. Now we get errors if we made mistakes and get completions.
+- Add type to axios get request `axios.get<Activity[]>('http://localhost:5000/api/activities').then(response=>{setActivities(response.data);})`,
+
+### Adding a Nav bar
+
+- Create NavBar.tsx in layout folder. Use semantic ui tags
+
+```tsx
+import { Button, Container, Menu } from "semantic-ui-react";
+
+interface Props {
+  openForm: () => void;
+}
+
+export default function NavBar({ openForm }: Props) {
+  return (
+    <Menu inverted fixed="top">
+      <Container>
+        <Menu.Item header>
+          <img
+            src="/assets/logo.png"
+            alt="logo"
+            style={{ marginRight: "10px" }}
+          />
+          Reactivities
+        </Menu.Item>
+        <Menu.Item name="Activities" />
+        <Menu.Item>
+          <Button onClick={openForm} positive content="Create Activity" />
+        </Menu.Item>
+      </Container>
+    </Menu>
+  );
+}
+```
+
+- Styles
+
+```css
+body {
+  background-color: #eaeaea !important;
+}
+
+.ui.inverted.top.fixed.menu {
+  background-image: linear-gradient(
+    90deg,
+    rgba(150, 15, 23, 1) 0%,
+    rgba(1, 148, 177, 1) 100%
+  ) !important;
+}
+```
+
+- Add to App.tsx
+
+```tsx
+return (
+    <>
+    <NavBar/>
+    <Container style={{ marginTop: "5em" }}>
+    </Container>
+      );
+```
+
+### Creating an activity dashboard
+
+- Create a dashboard directory in activities folder and Create **ActivityDashboard.tsx** component
+
+```tsx
+WI;
+```
+
+## Axios
+
+_WIP_
+
+## MobX
+
+#### Setting up MobX
 
 - `npm install mobx mobx-react-lite`
 - Create a folder named stores - for storing stores in one central location
@@ -469,9 +578,32 @@ function App() {
     <>
       <NavBar openForm={handleFormOpen} />
       <Container style={{ marginTop: "5em" }}>
-...
+		<!--... -->
         <h2>{activityStore.title}</h2>
       </Container>
     </>
   );
 ```
+
+#### MobX actions
+
+- Add action to activityStore, also changed makeObservable to makeAutoObservable. It detects properties and makes them observable, and detects functions to make them actions.
+
+```ts
+constructor() {
+    makeAutoObservable(this)
+    }    
+setTitle = () => {
+        this.title = this.title + '!';
+    }
+```
+
+- Using in view
+
+```ts
+<!--...-->
+<Button content='Add exclamation!' positive onClick={activityStore.setTitle}></Button>
+
+export default observer(App);
+```
+
