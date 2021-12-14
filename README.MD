@@ -926,3 +926,58 @@ export default function ActivityForm({ createOrEdit, submitting }: Props) {
 }
 ```
 
+#### Create and edit with MobX
+
+- Removed handleCreateOrEditActivity from **App.tsx**
+- Removed createOrEdit from **ActivityDashboard.tsx**
+- Added createActivity and updateActivity functions to **activityStore.ts**
+
+```ts
+    createActivity = async (activity: Activity) => {
+        this.loading = true;
+        activity.id = uuid();
+        try {
+            await agent.Activities.create(activity);
+            runInAction(() => {
+                this.activities.push(activity);
+                this.selectedActivity = activity;
+                this.editMode = false;
+                this.loading = false;
+            })
+        } catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.loading = false;
+            }
+            )
+        }
+    }
+
+    updateActivity = async (activity: Activity) => {
+        this.loading = true;
+        try {
+            await agent.Activities.update(activity);
+            runInAction(() => {
+                this.activities = [...this.activities.filter(a => a.id !== activity.id)];
+                this.selectedActivity = activity;
+                this.editMode = false;
+                this.loading = false;
+            })
+        }
+        catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.loading = false
+            })
+        }
+    }
+```
+
+- Updated **ActivityForm.tsx**. Removed props and changed handleSubmit logic
+
+```tsx
+   function handleSubmit() {
+        activity.id ? updateActivity(activity) : createActivity(activity);
+    }
+```
+
