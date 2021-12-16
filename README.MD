@@ -981,3 +981,52 @@ export default function ActivityForm({ createOrEdit, submitting }: Props) {
     }
 ```
 
+#### Delete with MobX
+
+- Added functionality to **activityStore.ts**
+
+```ts
+    deleteActivity = async (id: string) => {
+        this.loading = true;
+        try {
+            await agent.Activities.delete(id);
+            runInAction(() => {
+                this.activities = [...this.activities.filter(a => a.id !== id)];
+                if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
+                this.loading = false;
+            })
+        }
+        catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.loading = false;
+            })
+        }
+    }
+```
+
+- Cleanup of props in **ActivityDashboard.tsx** and **App.tsx**
+
+- Cleanup and useStore in **ActivityList.tsx**
+
+```tsx
+export default observer(function ActivityList() {
+    const { activityStore } = useStore();
+    const { deleteActivity, activities, loading } = activityStore;
+//...
+    return (
+        <Segment>
+<!--...-->                                
+            <Button
+                name={activity.id}
+                loading={loading && target === activity.id}
+                onClick={(e) => handleActivityDelete(e, activity.id)}
+                floated='right'
+                content='Delete'
+                color='red' />
+<!--...-->                                
+        </Segment>
+    )
+})
+```
+

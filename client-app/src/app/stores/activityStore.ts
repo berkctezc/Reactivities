@@ -10,7 +10,6 @@ export default class ActivityStore {
     loading = false;
     loadingInitial = false;
 
-
     constructor() {
         makeAutoObservable(this)
     }
@@ -87,6 +86,24 @@ export default class ActivityStore {
             console.log(error);
             runInAction(() => {
                 this.loading = false
+            })
+        }
+    }
+
+    deleteActivity = async (id: string) => {
+        this.loading = true;
+        try {
+            await agent.Activities.delete(id);
+            runInAction(() => {
+                this.activities = [...this.activities.filter(a => a.id !== id)];
+                if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
+                this.loading = false;
+            })
+        }
+        catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.loading = false;
             })
         }
     }
