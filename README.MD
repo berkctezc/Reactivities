@@ -1184,3 +1184,18 @@ if (activityStore.loadingInitial) return <LoadingComponent content="Loading app"
 </Container>
 ```
 
+#### Details Link
+
+- Added route to **App.tsx**
+
+```tsx
+<Route path='/activities:id' element={<ActivityDetails />} />
+```
+
+- Added Link to **ActivityList.tsx**
+
+```tsx
+<Button as={Link} to={`/activities/${activity.id}`} floated='right' content='View' color='blue' />
+
+```
+
