@@ -592,7 +592,7 @@ function App() {
 ```ts
 constructor() {
     makeAutoObservable(this)
-    }    
+    }
 setTitle = () => {
         this.title = this.title + '!';
     }
@@ -609,7 +609,7 @@ export default observer(App);
 
 #### Refactoring code for MobX
 
-- Moved activities variable and logic from state of the component to store. 
+- Moved activities variable and logic from state of the component to store.
 - **App.tsx**
 
 ```tsx
@@ -637,28 +637,28 @@ export default observer(App);
 
 ```ts
 export default class ActivityStore {
-    activities: Activity[] = [];
-    selectedActivity: Activity | null = null;
-    editMode = false;
-    loading = false;
-    loadingInitial = false;
-    constructor() {
-        makeAutoObservable(this)
+  activities: Activity[] = [];
+  selectedActivity: Activity | null = null;
+  editMode = false;
+  loading = false;
+  loadingInitial = false;
+  constructor() {
+    makeAutoObservable(this);
+  }
+  loadActivities = async () => {
+    this.loadingInitial = true;
+    try {
+      const activities = await agent.Activities.list();
+      activities.forEach((activity) => {
+        activity.date = activity.date.split("T")[0];
+        this.activities.push(activity);
+      });
+      this.loadingInitial = false;
+    } catch (error) {
+      console.log(error);
+      this.loadingInitial = false;
     }
-    loadActivities = async () => {
-        this.loadingInitial = true;
-        try {
-            const activities = await agent.Activities.list();
-            activities.forEach(activity => {
-                activity.date = activity.date.split('T')[0];
-                this.activities.push(activity);
-            })
-            this.loadingInitial = false;
-        } catch (error) {
-            console.log(error);
-            this.loadingInitial = false;
-        }
-    }
+  };
 }
 ```
 
@@ -684,27 +684,31 @@ function App() {
     setSubmitting(true);
     if (activity.id) {
       agent.Activities.update(activity).then(() => {
-        setActivities([...activities.filter(x => x.id !== activity.id), activity]);
+        setActivities([
+          ...activities.filter((x) => x.id !== activity.id),
+          activity,
+        ]);
         setSubmitting(false);
-      })
+      });
     } else {
       activity.id = uuid();
       agent.Activities.create(activity).then(() => {
         setActivities([...activities, activity]);
         setSubmitting(false);
-      })
+      });
     }
   }
 
   function handleDeleteActivity(id: string) {
     setSubmitting(true);
     agent.Activities.delete(id).then(() => {
-      setActivities([...activities.filter(x => x.id !== id)]);
+      setActivities([...activities.filter((x) => x.id !== id)]);
       setSubmitting(false);
-    })
+    });
   }
 
-  if (activityStore.loadingInitial) return <LoadingComponent content="Loading app" />
+  if (activityStore.loadingInitial)
+    return <LoadingComponent content="Loading app" />;
 
   return (
     <>
@@ -728,23 +732,30 @@ export default observer(App);
 
 ```tsx
 export default function NavBar() {
+  const { activityStore } = useStore();
 
-    const { activityStore } = useStore();
-
-    return (
-        <Menu inverted fixed="top">
-            <Container>
-                <Menu.Item header>
-                    <img src="/assets/logo.png" alt="logo" style={{ marginRight: '10px' }} />
-                    Reactivities
-                </Menu.Item>
-                <Menu.Item name="Activities" />
-                <Menu.Item>
-                    <Button onClick={() => activityStore.openForm()} positive content='Create Activity' />
-                </Menu.Item>
-            </Container>
-        </Menu>
-    );
+  return (
+    <Menu inverted fixed="top">
+      <Container>
+        <Menu.Item header>
+          <img
+            src="/assets/logo.png"
+            alt="logo"
+            style={{ marginRight: "10px" }}
+          />
+          Reactivities
+        </Menu.Item>
+        <Menu.Item name="Activities" />
+        <Menu.Item>
+          <Button
+            onClick={() => activityStore.openForm()}
+            positive
+            content="Create Activity"
+          />
+        </Menu.Item>
+      </Container>
+    </Menu>
+  );
 }
 ```
 
@@ -752,47 +763,46 @@ export default function NavBar() {
 
 ```ts
 export default class ActivityStore {
-    activities: Activity[] = [];
-    selectedActivity: Activity | undefined = undefined;
-    editMode = false;
-    loading = false;
-    loadingInitial = false;
+  activities: Activity[] = [];
+  selectedActivity: Activity | undefined = undefined;
+  editMode = false;
+  loading = false;
+  loadingInitial = false;
 
-    constructor() {
-        makeAutoObservable(this)
-    }
+  constructor() {
+    makeAutoObservable(this);
+  }
 
-    loadActivities = async () => {
-        this.setLoadingInitial(true);
-        try {
-            const activities = await agent.Activities.list();
-            activities.forEach(activity => {
-                activity.date = activity.date.split('T')[0];
-                this.activities.push(activity);
-            })
-            this.setLoadingInitial(false);
-        } catch (error) {
-            console.log(error);
-            this.setLoadingInitial(false);
-
-        }
+  loadActivities = async () => {
+    this.setLoadingInitial(true);
+    try {
+      const activities = await agent.Activities.list();
+      activities.forEach((activity) => {
+        activity.date = activity.date.split("T")[0];
+        this.activities.push(activity);
+      });
+      this.setLoadingInitial(false);
+    } catch (error) {
+      console.log(error);
+      this.setLoadingInitial(false);
     }
-    setLoadingInitial = (state: boolean) => {
-        this.loadingInitial = state;
-    }
-    selectActivity = (id: string) => {
-        this.selectedActivity = this.activities.find(a => a.id === id);
-    }
-    cancelSelectedActivity = () => {
-        this.selectedActivity = undefined;
-    }
-    openForm = (id?: string) => {
-        id ? this.selectActivity(id) : this.cancelSelectedActivity();
-        this.editMode = true;
-    }
-    closeForm = () => {
-        this.editMode = false;
-    }
+  };
+  setLoadingInitial = (state: boolean) => {
+    this.loadingInitial = state;
+  };
+  selectActivity = (id: string) => {
+    this.selectedActivity = this.activities.find((a) => a.id === id);
+  };
+  cancelSelectedActivity = () => {
+    this.selectedActivity = undefined;
+  };
+  openForm = (id?: string) => {
+    id ? this.selectActivity(id) : this.cancelSelectedActivity();
+    this.editMode = true;
+  };
+  closeForm = () => {
+    this.editMode = false;
+  };
 }
 ```
 
@@ -800,119 +810,121 @@ export default class ActivityStore {
 
 ```tsx
 interface Props {
-    activities: Activity[];
-    createOrEdit: (activity: Activity) => void;
-    deleteActivity: (id: string) => void;
-    submitting: (boolean);
+  activities: Activity[];
+  createOrEdit: (activity: Activity) => void;
+  deleteActivity: (id: string) => void;
+  submitting: boolean;
 }
 
-export default observer(function ActivityDashboard({ activities, deleteActivity, createOrEdit, submitting }: Props) {
+export default observer(function ActivityDashboard({
+  activities,
+  deleteActivity,
+  createOrEdit,
+  submitting,
+}: Props) {
+  const { activityStore } = useStore();
+  const { selectedActivity, editMode } = activityStore;
 
-    const { activityStore } = useStore();
-    const { selectedActivity, editMode } = activityStore;
-
-    return (
-        <Grid>
-            <Grid.Column width='10'>
-                <ActivityList activities={activities}
-                    deleteActivity={deleteActivity}
-                    submitting={submitting}
-                />
-            </Grid.Column>
-            <Grid.Column width='6'>
-                {
-                    selectedActivity
-                    &&
-                    !editMode
-                    &&
-                    <ActivityDetails />
-                }
-                {editMode &&
-                    <ActivityForm
-                        createOrEdit={createOrEdit}
-                        submitting={submitting}
-                    />
-                }
-            </Grid.Column>
-        </Grid>
-    )
-})
+  return (
+    <Grid>
+      <Grid.Column width="10">
+        <ActivityList
+          activities={activities}
+          deleteActivity={deleteActivity}
+          submitting={submitting}
+        />
+      </Grid.Column>
+      <Grid.Column width="6">
+        {selectedActivity && !editMode && <ActivityDetails />}
+        {editMode && (
+          <ActivityForm createOrEdit={createOrEdit} submitting={submitting} />
+        )}
+      </Grid.Column>
+    </Grid>
+  );
+});
 ```
 
 - ActivityList.tsx
 
 ```tsx
 interface Props {
-    activities: Activity[];
-    createOrEdit: (activity: Activity) => void;
-    deleteActivity: (id: string) => void;
-    submitting: (boolean);
+  activities: Activity[];
+  createOrEdit: (activity: Activity) => void;
+  deleteActivity: (id: string) => void;
+  submitting: boolean;
 }
 
-export default observer(function ActivityDashboard({ activities, deleteActivity, createOrEdit, submitting }: Props) {
+export default observer(function ActivityDashboard({
+  activities,
+  deleteActivity,
+  createOrEdit,
+  submitting,
+}: Props) {
+  const { activityStore } = useStore();
+  const { selectedActivity, editMode } = activityStore;
 
-    const { activityStore } = useStore();
-    const { selectedActivity, editMode } = activityStore;
-
-    return (
-        <Grid>
-            <Grid.Column width='10'>
-                <ActivityList activities={activities}
-                    deleteActivity={deleteActivity}
-                    submitting={submitting}
-                />
-            </Grid.Column>
-            <Grid.Column width='6'>
-                {
-                    selectedActivity
-                    &&
-                    !editMode
-                    &&
-                    <ActivityDetails />
-                }
-                {editMode &&
-                    <ActivityForm
-                        createOrEdit={createOrEdit}
-                        submitting={submitting}
-                    />
-                }
-            </Grid.Column>
-        </Grid>
-    )
-})
+  return (
+    <Grid>
+      <Grid.Column width="10">
+        <ActivityList
+          activities={activities}
+          deleteActivity={deleteActivity}
+          submitting={submitting}
+        />
+      </Grid.Column>
+      <Grid.Column width="6">
+        {selectedActivity && !editMode && <ActivityDetails />}
+        {editMode && (
+          <ActivityForm createOrEdit={createOrEdit} submitting={submitting} />
+        )}
+      </Grid.Column>
+    </Grid>
+  );
+});
 ```
 
 - ActivityDetailst.tsx
 
 ```tsx
 export default function ActivityDetails() {
-    const { activityStore } = useStore();
-    const { selectedActivity: activity, openForm, cancelSelectedActivity } = activityStore;
+  const { activityStore } = useStore();
+  const {
+    selectedActivity: activity,
+    openForm,
+    cancelSelectedActivity,
+  } = activityStore;
 
-    if (!activity) return <LoadingComponent content={''} />;
+  if (!activity) return <LoadingComponent content={""} />;
 
-    return (
-        <Card fluid>
-            <Image src={`/assets/categoryImages/${activity.category}.jpg`} />
-            <Card.Content>
-                <Card.Header>
-                    {activity.title}
-                </Card.Header>
-                <Card.Meta>
-                    <span>{activity.date}</span>
-                </Card.Meta>
-                <Card.Description>
-                    {activity.description}
-                </Card.Description>
-            </Card.Content>
-            <Card.Content>
-                <Button.Group widths='2'>
-                    <Button onClick={() => openForm(activity.id)} basic color='blue' content='edit' />
-                    <Button onClick={cancelSelectedActivity} basic color='grey' content='cancel' />
-                </Button.Group>
-            </Card.Content>
-        </Card>
-    )
+  return (
+    <Card fluid>
+      <Image src={`/assets/categoryImages/${activity.category}.jpg`} />
+      <Card.Content>
+        <Card.Header>{activity.title}</Card.Header>
+        <Card.Meta>
+          <span>{activity.date}</span>
+        </Card.Meta>
+        <Card.Description>{activity.description}</Card.Description>
+      </Card.Content>
+      <Card.Content>
+        <Button.Group widths="2">
+          <Button
+            onClick={() => openForm(activity.id)}
+            basic
+            color="blue"
+            content="edit"
+          />
+          <Button
+            onClick={cancelSelectedActivity}
+            basic
+            color="grey"
+            content="cancel"
+          />
+        </Button.Group>
+      </Card.Content>
+    </Card>
+  );
 }
 ```
 
@@ -920,9 +932,9 @@ export default function ActivityDetails() {
 
 ```tsx
 export default function ActivityForm({ createOrEdit, submitting }: Props) {
-    const { activityStore } = useStore();
-    const { selectedActivity, closeForm } = activityStore;
-    //...
+  const { activityStore } = useStore();
+  const { selectedActivity, closeForm } = activityStore;
+  //...
 }
 ```
 
@@ -933,52 +945,52 @@ export default function ActivityForm({ createOrEdit, submitting }: Props) {
 - Added createActivity and updateActivity functions to **activityStore.ts**
 
 ```ts
-    createActivity = async (activity: Activity) => {
-        this.loading = true;
-        activity.id = uuid();
-        try {
-            await agent.Activities.create(activity);
-            runInAction(() => {
-                this.activities.push(activity);
-                this.selectedActivity = activity;
-                this.editMode = false;
-                this.loading = false;
-            })
-        } catch (error) {
-            console.log(error);
-            runInAction(() => {
-                this.loading = false;
-            }
-            )
-        }
-    }
+createActivity = async (activity: Activity) => {
+  this.loading = true;
+  activity.id = uuid();
+  try {
+    await agent.Activities.create(activity);
+    runInAction(() => {
+      this.activities.push(activity);
+      this.selectedActivity = activity;
+      this.editMode = false;
+      this.loading = false;
+    });
+  } catch (error) {
+    console.log(error);
+    runInAction(() => {
+      this.loading = false;
+    });
+  }
+};
 
-    updateActivity = async (activity: Activity) => {
-        this.loading = true;
-        try {
-            await agent.Activities.update(activity);
-            runInAction(() => {
-                this.activities = [...this.activities.filter(a => a.id !== activity.id)];
-                this.selectedActivity = activity;
-                this.editMode = false;
-                this.loading = false;
-            })
-        }
-        catch (error) {
-            console.log(error);
-            runInAction(() => {
-                this.loading = false
-            })
-        }
-    }
+updateActivity = async (activity: Activity) => {
+  this.loading = true;
+  try {
+    await agent.Activities.update(activity);
+    runInAction(() => {
+      this.activities = [
+        ...this.activities.filter((a) => a.id !== activity.id),
+      ];
+      this.selectedActivity = activity;
+      this.editMode = false;
+      this.loading = false;
+    });
+  } catch (error) {
+    console.log(error);
+    runInAction(() => {
+      this.loading = false;
+    });
+  }
+};
 ```
 
 - Updated **ActivityForm.tsx**. Removed props and changed handleSubmit logic
 
 ```tsx
-   function handleSubmit() {
-        activity.id ? updateActivity(activity) : createActivity(activity);
-    }
+function handleSubmit() {
+  activity.id ? updateActivity(activity) : createActivity(activity);
+}
 ```
 
 #### Delete with MobX
@@ -986,21 +998,22 @@ export default function ActivityForm({ createOrEdit, submitting }: Props) {
 - Added functionality to **activityStore.ts**
 
 ```ts
-    deleteActivity = async (id: string) => {
-        this.loading = true;
-        try {
-            await agent.Activities.delete(id);
-            runInAction(() => {
-                this.activities = [...this.activities.filter(a => a.id !== id)];
-                if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
-                this.loading = false;
-            })}
-        catch (error) {
-            console.log(error);
-            runInAction(() => {
-                this.loading = false;
-            })}
-    }
+deleteActivity = async (id: string) => {
+  this.loading = true;
+  try {
+    await agent.Activities.delete(id);
+    runInAction(() => {
+      this.activities = [...this.activities.filter((a) => a.id !== id)];
+      if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
+      this.loading = false;
+    });
+  } catch (error) {
+    console.log(error);
+    runInAction(() => {
+      this.loading = false;
+    });
+  }
+};
 ```
 
 - Cleanup of props in **ActivityDashboard.tsx** and **App.tsx**
@@ -1014,7 +1027,7 @@ export default observer(function ActivityList() {
 //...
     return (
         <Segment>
-<!--...-->                                
+<!--...-->
             <Button
                 name={activity.id}
                 loading={loading && target === activity.id}
@@ -1022,7 +1035,7 @@ export default observer(function ActivityList() {
                 floated='right'
                 content='Delete'
                 color='red' />
-<!--...-->                                
+<!--...-->
         </Segment>
     )
 })
@@ -1034,63 +1047,123 @@ export default observer(function ActivityList() {
 
 ```ts
 export default class ActivityStore {
-    activityRegistry = new Map<string, Activity>();
-//...
-    get activitiesByDate() {
-        return Array.from(this.activityRegistry.values()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+  activityRegistry = new Map<string, Activity>();
+  //...
+  get activitiesByDate() {
+    return Array.from(this.activityRegistry.values()).sort(
+      (a, b) => Date.parse(a.date) - Date.parse(b.date)
+    );
+  }
+  //...
+  loadActivities = async () => {
+    try {
+      const activities = await agent.Activities.list();
+      activities.forEach((activity) => {
+        activity.date = activity.date.split("T")[0];
+        this.activityRegistry.set(activity.id, activity);
+      });
+      this.setLoadingInitial(false);
+    } catch (error) {
+      console.log(error);
+      this.setLoadingInitial(false);
     }
-//...
-    loadActivities = async () => {
-        try {
-            const activities = await agent.Activities.list();
-            activities.forEach(activity => {
-                activity.date = activity.date.split('T')[0];
-                this.activityRegistry.set(activity.id, activity);
-            })
-            this.setLoadingInitial(false);
-        } catch (error) {
-            console.log(error);
-            this.setLoadingInitial(false);
-        }}
-//...
-    selectActivity = (id: string) => {
-        this.selectedActivity = this.activityRegistry.get(id);
+  };
+  //...
+  selectActivity = (id: string) => {
+    this.selectedActivity = this.activityRegistry.get(id);
+  };
+  //...
+  createActivity = async (activity: Activity) => {
+    this.loading = true;
+    activity.id = uuid();
+    try {
+      await agent.Activities.create(activity);
+      runInAction(() => {
+        this.activityRegistry.set(activity.id, activity);
+        this.selectedActivity = activity;
+        this.editMode = false;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.log(error);
+      runInAction(() => {
+        this.loading = false;
+      });
     }
-//...
-    createActivity = async (activity: Activity) => {
-        this.loading = true;
-        activity.id = uuid();
-        try {
-            await agent.Activities.create(activity);
-            runInAction(() => {
-                this.activityRegistry.set(activity.id, activity);
-                this.selectedActivity = activity;
-                this.editMode = false;
-                this.loading = false;
-            })
-        } catch (error) {
-            console.log(error);
-            runInAction(() => {
-                this.loading = false;
-            })}
+  };
+  //...
+  deleteActivity = async (id: string) => {
+    this.loading = true;
+    try {
+      await agent.Activities.delete(id);
+      runInAction(() => {
+        this.activityRegistry.delete(id);
+        if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
+        this.loading = false;
+      });
+    } catch (error) {
+      console.log(error);
+      runInAction(() => {
+        this.loading = false;
+      });
     }
-//...
-    deleteActivity = async (id: string) => {
-        this.loading = true;
-        try {
-            await agent.Activities.delete(id);
-            runInAction(() => {
-                this.activityRegistry.delete(id);
-                if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
-                this.loading = false;
-            })}
-        catch (error) {
-            console.log(error);
-            runInAction(() => {
-                this.loading = false;
-            })}
-    }
+  };
 }
 ```
 
 - Added activitiesByDate to activity Store deconstructor in **ActivityList.tsx** and changed it in view.
+
+## React Router
+
+#### Installing react router
+
+- `npm install react-router-dom@5.3.0`
+  `npm install @types/react-router-dom@5.3.2 --save-dev`
+
+- Wrap App with BrowserRouter in **index.tsx**
+
+```tsx
+<BrowserRouter>
+    <App />
+</BrowserRouter>
+```
+
+#### Adding Routers
+
+- Added **HomePage.tsx** for route example
+
+```tsx
+import { Container } from "semantic-ui-react";
+
+export default function HomePage() {
+    return (
+        <Container style={{ marginTop: '7em' }}>
+            <h1>Home Page</h1>
+        </Container>
+    )}
+```
+
+- Specified routes in **App.tsx**
+
+```tsx
+<NavBar />
+<Container style={{ marginTop: "5em" }}>
+    <Routes>
+        <Route path='/' element={<HomePage />} />
+        <Route path='/activities' element={<ActivityDashboard />} />
+        <Route path='/createActivity' element={<ActivityForm />} />
+    </Routes>
+</Container>
+```
+
+- Moved loading to ActivityDashboard
+
+```tsx
+useEffect(() => {
+    activityStore.loadActivities();
+}, [activityStore]);
+
+if (activityStore.loadingInitial) return <LoadingComponent content="Loading app" />
+
+```
+
