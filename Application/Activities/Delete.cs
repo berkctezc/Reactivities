@@ -5,36 +5,35 @@ using AutoMapper;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public class Delete
 {
-    public class Delete
+    public class Command : IRequest
     {
-        public class Command : IRequest
+        public Guid Id { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Command>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
-            public Guid Id { get; set; }
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Command>
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
+            var activityToDelete = await _context.Activities.FindAsync(request.Id);
 
-            public Handler(DataContext context, IMapper mapper)
-            {
-                _context = context;
-                _mapper = mapper;
-            }
+            _context.Remove(activityToDelete);
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-            {
-                var activityToDelete = await _context.Activities.FindAsync(request.Id);
+            await _context.SaveChangesAsync(cancellationToken);
 
-                _context.Remove(activityToDelete);
-
-                await _context.SaveChangesAsync(cancellationToken);
-
-                return Unit.Value;
-            }
+            return Unit.Value;
         }
     }
 }

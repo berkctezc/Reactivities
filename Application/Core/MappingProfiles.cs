@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
 using Domain;
 
-namespace Application.Core
+namespace Application.Core;
+
+public class MappingProfiles : Profile
 {
-    public class MappingProfiles : Profile
+    public MappingProfiles()
     {
-        public MappingProfiles()
-        {
-            CreateMap<Activity, Activity>();
-        }
+        CreateMap<Activity, Activity>();
     }
 }

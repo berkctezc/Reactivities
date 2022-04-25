@@ -6,25 +6,24 @@ using Domain;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public class List
 {
-    public class List
+    public class Query : IRequest<List<Activity>> { }
+
+    public class Handler : IRequestHandler<Query, List<Activity>>
     {
-        public class Query : IRequest<List<Activity>> { }
+        private readonly DataContext _context;
 
-        public class Handler : IRequestHandler<Query, List<Activity>>
+        public Handler(DataContext context)
         {
-            private readonly DataContext _context;
+            _context = context;
+        }
 
-            public Handler(DataContext context)
-            {
-                _context = context;
-            }
-
-            public async Task<List<Activity>> Handle(Query request, CancellationToken cancellationToken)
-            {
-                return await _context.Activities.ToListAsync(cancellationToken: cancellationToken);
-            }
+        public async Task<List<Activity>> Handle(Query request, CancellationToken cancellationToken)
+        {
+            return await _context.Activities.ToListAsync(cancellationToken: cancellationToken);
         }
     }
 }

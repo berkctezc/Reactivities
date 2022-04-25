@@ -540,8 +540,8 @@ export default class ActivitStore {
 }
 ```
 
-```tsx
 - Create an interface store
+```tsx
 
 import { createContext, useContext } from 'react';
 import ActivitStore from './activityStore';
@@ -1196,6 +1196,47 @@ if (activityStore.loadingInitial) return <LoadingComponent content="Loading app"
 
 ```tsx
 <Button as={Link} to={`/activities/${activity.id}`} floated='right' content='View' color='blue' />
+```
 
+#### Getting an individual activity
+
+- Removed setLoadingInitial, selectActivity, cancelSelectedActivity, openForm, closeForm from **activityStore.ts** and added these.
+
+```ts
+loadActivities = async () => {
+    try {
+        const activities = await agent.Activities.list();
+        activities.forEach(activity => {
+            this.setActivity(activity);
+        })
+        this.setLoadingInitial(false);
+    } catch (error) {
+        console.log(error);
+        this.setLoadingInitial(false);
+    }}
+loadActivity = async (id: string) => {
+    let activity = this.getActivity(id);
+    if (activity) {
+        this.selectedActivity = activity;
+    } else {
+        this.loadingInitial = true;
+        try {
+            activity = await agent.Activities.details(id);
+            this.setActivity(activity);
+            this.setLoadingInitial(false);
+        } catch (error) {
+            console.log(error);
+            this.setLoadingInitial(false);
+        }}}
+private setActivity = (activity: Activity) => {
+    activity.date = activity.date.split('T')[0];
+    this.activityRegistry.set(activity.id, activity);
+}
+private getActivity = (id: string) => {
+    return this.activityRegistry.get(id);
+}
+setLoadingInitial = (state: boolean) => {
+    this.loadingInitial = state;
+}
 ```
 

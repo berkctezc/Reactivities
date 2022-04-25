@@ -5,36 +5,35 @@ using Domain;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public class Edit
 {
-    public class Edit
+    public class Command : IRequest
     {
-        public class Command : IRequest
+        public Activity Activity { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Command>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
-            public Activity Activity { get; set; }
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Command>
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
+            var activityToUpdate = await _context.Activities.FindAsync(request.Activity.Id);
 
-            public Handler(DataContext context, IMapper mapper)
-            {
-                _context = context;
-                _mapper = mapper;
-            }
+            _mapper.Map(request.Activity, activityToUpdate);
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-            {
-                var activityToUpdate = await _context.Activities.FindAsync(request.Activity.Id);
+            await _context.SaveChangesAsync(cancellationToken);
 
-                _mapper.Map(request.Activity, activityToUpdate);
-
-                await _context.SaveChangesAsync(cancellationToken);
-
-                return Unit.Value;
-            }
+            return Unit.Value;
         }
     }
 }
