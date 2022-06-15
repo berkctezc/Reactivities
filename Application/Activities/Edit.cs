@@ -1,39 +1,53 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using AutoMapper;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities;
-
-public class Edit
+namespace Application.Activities
 {
-    public class Command : IRequest
+    public class Edit
     {
-        public Activity Activity { get; set; }
-    }
-
-    public class Handler : IRequestHandler<Command>
-    {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
-
-        public Handler(DataContext context, IMapper mapper)
+        public class Command : IRequest<Result<Unit>>
         {
-            _context = context;
-            _mapper = mapper;
+            public Activity Activity { get; set; }
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public class CommandValidator : AbstractValidator<Command>
         {
-            var activityToUpdate = await _context.Activities.FindAsync(request.Activity.Id);
+            public CommandValidator()
+            {
+                RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+            }
+        }
 
-            _mapper.Map(request.Activity, activityToUpdate);
+        public class Handler : IRequestHandler<Command, Result<Unit>>
+        {
+            private readonly DataContext _context;
+            private readonly IMapper _mapper;
+            public Handler(DataContext context, IMapper mapper)
+            {
+                _mapper = mapper;
+                _context = context;
+            }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var activity = await _context.Activities.FindAsync(request.Activity.Id);
 
-            return Unit.Value;
+                if (activity == null) return null;
+
+                _mapper.Map(request.Activity, activity);
+
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if (!result) return Result<Unit>.Failure("Failed to update activity");
+
+                return Result<Unit>.Success(Unit.Value);
+            }
         }
     }
 }

@@ -1,29 +1,32 @@
-﻿using MediatR;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Domain;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Persistence;
 
-namespace Application.Activities;
-
-public class List
+namespace Application.Activities
 {
-    public class Query : IRequest<List<Activity>> { }
-
-    public class Handler : IRequestHandler<Query, List<Activity>>
+    public class List
     {
-        private readonly DataContext _context;
+        public class Query : IRequest<Result<List<Activity>>> { }
 
-        public Handler(DataContext context)
+        public class Handler : IRequestHandler<Query, Result<List<Activity>>>
         {
-            _context = context;
-        }
+            private readonly DataContext _context;
+            public Handler(DataContext context)
+            {
+                _context = context;
+            }
 
-        public async Task<List<Activity>> Handle(Query request, CancellationToken cancellationToken)
-        {
-            return await _context.Activities.ToListAsync(cancellationToken: cancellationToken);
+            public async Task<Result<List<Activity>>> Handle(Query request, CancellationToken cancellationToken)
+            {
+                return Result<List<Activity>>.Success(await _context.Activities.ToListAsync(cancellationToken));
+            }
         }
     }
 }

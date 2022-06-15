@@ -1,39 +1,41 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
+using Application.Core;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities;
-
-public class Delete
+namespace Application.Activities
 {
-    public class Command : IRequest
+    public class Delete
     {
-        public Guid Id { get; set; }
-    }
-
-    public class Handler : IRequestHandler<Command>
-    {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
-
-        public Handler(DataContext context, IMapper mapper)
+        public class Command : IRequest<Result<Unit>>
         {
-            _context = context;
-            _mapper = mapper;
+            public Guid Id { get; set; }
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
-            var activityToDelete = await _context.Activities.FindAsync(request.Id);
+            private readonly DataContext _context;
+            public Handler(DataContext context)
+            {
+                _context = context;
+            }
 
-            _context.Remove(activityToDelete);
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var activity = await _context.Activities.FindAsync(request.Id);
 
-            await _context.SaveChangesAsync(cancellationToken);
+                // if (activity == null) return null;
 
-            return Unit.Value;
+                _context.Remove(activity);
+
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if (!result) return Result<Unit>.Failure("Failed to delete the activity");
+
+                return Result<Unit>.Success(Unit.Value);
+            }
         }
     }
 }
