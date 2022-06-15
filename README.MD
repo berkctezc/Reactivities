@@ -551,7 +551,7 @@ export default class ActivitStore {
 ```
 
 - Create an interface store
-
+  
   ```tsx
   
   ```
@@ -1361,4 +1361,212 @@ loadActivity = async (id: string) => {
 ```
 
 #### Adding a key to the route
+
 -
+
+- Add location to **App.tsx**
+  
+  ```tsx
+  function App() {
+    const location = useLocation();
+  
+    return (
+      <>
+        <Route exact path='/' component={HomePage} />
+        <Route
+          path={'/(.+)'}
+          render={() => (
+            <>
+              <NavBar />
+              <Container style={{ marginTop: '7em' }}>
+               //...
+                <Route key={location.key} path={['/createActivity ', '/manage/:id']} component={ActivityForm} />
+              </Container>
+           //...
+  ```
+
+#### Redirect after submission
+
+- moved uuid generation from activity store to **ActivityForm**
+
+- updated handleSubmit in **ActivityForm**
+
+```tsx
+    function handleSubmit() {
+        if (activity.id.length === 0) {
+            let newActivity = {
+                ...activity,
+                id: uuid()
+            };
+            createActivity(newActivity).then(() => history.push(`/activities/${newActivity.id}`))
+        } else {
+            updateActivity(activity).then(() => history.push(`/activities/${activity.id}`))
+        }
+    }
+```
+
+#### Moving the home page outside of nav
+
+- in **App.tsx**
+
+```tsx
+function App() {
+  const location = useLocation();
+
+  return (
+    <>
+      <Route exact path='/' component={HomePage} />
+      <Route
+        path={'/(.+)'}
+        render={() => (
+          <>
+            <NavBar />
+            <Container style={{ marginTop: '7em' }}>
+              <Route exact path='/activities' component={ActivityDashboard} />
+              <Route path='/activities/:id' component={ActivityDetails} />
+              <Route key={location.key} path={['/createActivity ', '/manage/:id']} component={ActivityForm} />
+            </Container>
+          </>
+        )}
+      />
+    </>
+  );
+}
+```
+
+- Add link to activities in HomePage
+
+```tsx
+ return (
+        <Container style={{ marginTop: '7em' }}>
+            <h1>Home page</h1>
+            <h3>Go to <Link to='/activities'>Activities</Link></h3>
+        </Container>
+    )
+```
+
+#### Styling the activity list
+
+- moved activity list item out of ActivityList to ActivityListItem
+  
+  ```tsx
+  interface Props {
+      activity: Activity
+  }
+  
+  export default function ActivityListItem({activity}: Props) {
+      const { activityStore } = useStore();
+      const { deleteActivity, loading } = activityStore;
+  
+      const [target, setTarget] = useState('');
+  
+      function handleActivityDelete(e: SyntheticEvent<HTMLButtonElement>, id: string) {
+          setTarget(e.currentTarget.name);
+          deleteActivity(id);
+      }
+  
+      return (
+          <Item key={activity.id}>
+              <Item.Content>
+                  <Item.Header as='a'>{activity.title}</Item.Header>
+                  <Item.Meta>{activity.date}</Item.Meta>
+                  <Item.Description>
+                      <div>{activity.description}</div>
+                      <div>{activity.city}, {activity.venue}</div>
+                  </Item.Description>
+                  <Item.Extra>
+                      <Button as={Link} to={`/activities/${activity.id}`} floated='right' content='View' color='blue' />
+                      <Button
+                          name={activity.id}
+                          loading={loading && target === activity.id}
+                          onClick={(e) => handleActivityDelete(e, activity.id)}
+                          floated='right'
+                          content='Delete'
+                          color='red'
+                      />
+                      <Label basic content={activity.category} />
+                  </Item.Extra>
+              </Item.Content>
+          </Item>
+      )
+  }
+  ```
+
+#### Grouping the activities by date
+
+- Added groupedActivities function to activityStore
+  
+  ```tsx
+  get groupedActivities() {
+     return Object.entries(
+        this.activitiesByDate.reduce((activities, activity)=>{
+           const date = activity.date;
+           activities[date] = activities[date] ? [...activities[date], activity] : [activity];
+           return activities;
+     },{} as {[key: string]: Activity[]})
+    )
+  }
+  ```
+
+- updated ActivityList to use groupedActivities
+
+```tsx
+ return (
+        <>
+        {groupedActivities.map(([group, activities])=>(
+            <Fragment key={group}>
+                    <Header sub color='teal'>
+                        {group}
+                    </Header>
+                <Segment>
+                    <Item.Group divided>
+                        {activities.map(activity => (
+                            <ActivityListItem key={activity.id} activity={activity} />
+                        ))}
+                    </Item.Group>
+                </Segment>
+            </Fragment>
+        ))}
+        </>
+    )
+```
+
+#### Styling the list items
+
+- ActivityListItem refactor
+  
+  ```tsx
+  return (
+          <Segment.Group>
+              <Segment>
+                  <Item.Group>
+                      <Item>
+                          <Item.Image size='tiny' circular src='https://picsum.photos/128'></Item.Image>
+                          <Item.Content>
+                              <Item.Header as={Link} to={`/activites/${activity.id}`}>
+                                  {activity.title}
+                              </Item.Header>
+                              <Item.Description>
+                                  Hosted by 😺
+                              </Item.Description>
+                          </Item.Content>
+                      </Item>
+                  </Item.Group>
+              </Segment>
+              <Segment>
+                  <span>
+                      <Icon name='clock' />{activity.date}
+                      <Icon name='marker' /> {activity.venue}
+                  </span>
+              </Segment>
+              <Segment secondary>
+                  Attendees go here
+              </Segment>
+              <Segment clearing>
+                  <span>{activity.description}</span>
+                  <Button as={Link} to={`/activities/${activity.id}`}
+                      color='teal' floated='right' content='View' />
+              </Segment>
+          </Segment.Group>
+      )
+  ```
