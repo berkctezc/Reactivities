@@ -1,32 +1,32 @@
-import { Link } from "react-router-dom";
-import { Button, Icon, Item, Label, Segment } from "semantic-ui-react";
-import { Activity } from "../../../app/models/activity";
+import { Link } from 'react-router-dom';
+import { Button, Icon, Item, Segment } from 'semantic-ui-react';
+import { Activity } from '../../../app/models/activity';
+import {format} from 'date-fns';
 
 interface Props {
     activity: Activity
 }
 
 export default function ActivityListItem({ activity }: Props) {
+
     return (
         <Segment.Group>
             <Segment>
                 <Item.Group>
                     <Item>
-                        <Item.Image size='tiny' circular src='https://picsum.photos/128'></Item.Image>
+                        <Item.Image size='tiny' circular src='/assets/user.png' />
                         <Item.Content>
-                            <Item.Header as={Link} to={`/activites/${activity.id}`}>
+                            <Item.Header as={Link} to={`/activities/${activity.id}`}>
                                 {activity.title}
                             </Item.Header>
-                            <Item.Description>
-                                Hosted by 😺
-                            </Item.Description>
+                            <Item.Description>Hosted by Bob</Item.Description>
                         </Item.Content>
                     </Item>
                 </Item.Group>
             </Segment>
             <Segment>
                 <span>
-                    <Icon name='clock' />{activity.date}
+                    <Icon name='clock' /> {format(activity.date!, 'dd MMM yyyy h:mm aa')}
                     <Icon name='marker' /> {activity.venue}
                 </span>
             </Segment>
@@ -35,7 +35,7 @@ export default function ActivityListItem({ activity }: Props) {
             </Segment>
             <Segment clearing>
                 <span>{activity.description}</span>
-                <Button
+                <Button 
                     as={Link}
                     to={`/activities/${activity.id}`}
                     color='teal'

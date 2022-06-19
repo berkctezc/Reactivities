@@ -7,7 +7,7 @@ export default class CommonStore {
     constructor() {
         makeAutoObservable(this);
     }
-
+    
     setServerError = (error: ServerError) => {
         this.error = error;
     }

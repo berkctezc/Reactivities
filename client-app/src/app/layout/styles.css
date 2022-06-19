@@ -3,22 +3,30 @@ body {
 }
 
 .ui.inverted.top.fixed.menu {
-  background-image: linear-gradient(90deg, rgba(150, 15, 23, 1) 0%, rgba(1, 148, 177, 1) 100%) !important;
+  background-image: linear-gradient(135deg, rgb(24,42,115) 0%, rgb(33, 138, 174) 69%, rgb(32,167,172) 89%) !important;
 }
 
 .react-calendar {
   width: 100%;
   border: none;
-  box-shadow: 0 1px 2px 0 rgba(34, 36, 38, .15);
+  box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
 }
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+/*home page styles*/
 
 .masthead {
   display: flex;
   align-items: center;
-  background-image: linear-gradient(135deg,
-      rgb(24, 42, 115) 0%,
-      rgb(33, 138, 174) 69%,
-      rgb(32, 167, 172) 89%) !important;
+  background-image: linear-gradient(
+          135deg,
+          rgb(24, 42, 115) 0%,
+          rgb(33, 138, 174) 69%,
+          rgb(32, 167, 172) 89%
+  ) !important;
   height: 100vh;
 }
 
@@ -36,3 +44,5 @@ body {
   font-size: 1.7em;
   font-weight: normal;
 }
+
+/*end home page styles*/
