@@ -1393,16 +1393,16 @@ loadActivity = async (id: string) => {
 
 ```tsx
     function handleSubmit() {
-        if (activity.id.length === 0) {
-            let newActivity = {
-                ...activity,
-                id: uuid()
-            };
-            createActivity(newActivity).then(() => history.push(`/activities/${newActivity.id}`))
-        } else {
-            updateActivity(activity).then(() => history.push(`/activities/${activity.id}`))
-        }
+    if (activity.id.length === 0) {
+        let newActivity = {
+            ...activity,
+            id: uuid()
+        };
+        createActivity(newActivity).then(() => history.push(`/activities/${newActivity.id}`))
+    } else {
+        updateActivity(activity).then(() => history.push(`/activities/${activity.id}`))
     }
+}
 ```
 
 #### Moving the home page outside of nav
@@ -1411,26 +1411,27 @@ loadActivity = async (id: string) => {
 
 ```tsx
 function App() {
-  const location = useLocation();
+    const location = useLocation();
 
-  return (
-    <>
-      <Route exact path='/' component={HomePage} />
-      <Route
-        path={'/(.+)'}
-        render={() => (
-          <>
-            <NavBar />
-            <Container style={{ marginTop: '7em' }}>
-              <Route exact path='/activities' component={ActivityDashboard} />
-              <Route path='/activities/:id' component={ActivityDetails} />
-              <Route key={location.key} path={['/createActivity ', '/manage/:id']} component={ActivityForm} />
-            </Container>
-          </>
-        )}
-      />
-    </>
-  );
+    return (
+        <>
+            <Route exact path='/' component={HomePage}/>
+            <Route
+                path={'/(.+)'}
+                render={() => (
+                    <>
+                        <NavBar/>
+                        <Container style={{marginTop: '7em'}}>
+                            <Route exact path='/activities' component={ActivityDashboard}/>
+                            <Route path='/activities/:id' component={ActivityDetails}/>
+                            <Route key={location.key} path={['/createActivity ', '/manage/:id']}
+                                   component={ActivityForm}/>
+                        </Container>
+                    </>
+                )}
+            />
+        </>
+    );
 }
 ```
 
@@ -1438,11 +1439,11 @@ function App() {
 
 ```tsx
  return (
-        <Container style={{ marginTop: '7em' }}>
-            <h1>Home page</h1>
-            <h3>Go to <Link to='/activities'>Activities</Link></h3>
-        </Container>
-    )
+    <Container style={{marginTop: '7em'}}>
+        <h1>Home page</h1>
+        <h3>Go to <Link to='/activities'>Activities</Link></h3>
+    </Container>
+)
 ```
 
 #### Styling the activity list
@@ -1512,28 +1513,28 @@ function App() {
 
 ```tsx
  return (
-        <>
-        {groupedActivities.map(([group, activities])=>(
+    <>
+        {groupedActivities.map(([group, activities]) => (
             <Fragment key={group}>
-                    <Header sub color='teal'>
-                        {group}
-                    </Header>
+                <Header sub color='teal'>
+                    {group}
+                </Header>
                 <Segment>
                     <Item.Group divided>
                         {activities.map(activity => (
-                            <ActivityListItem key={activity.id} activity={activity} />
+                            <ActivityListItem key={activity.id} activity={activity}/>
                         ))}
                     </Item.Group>
                 </Segment>
             </Fragment>
         ))}
-        </>
-    )
+    </>
+)
 ```
 
 #### Styling the list items
 
-- ActivityListItem refactor
+- ActivityListItem refactor, removed Segment and ItemGroup tags from ActivityList
   
   ```tsx
   return (
@@ -1570,3 +1571,329 @@ function App() {
           </Segment.Group>
       )
   ```
+
+#### Activity details page
+
+- refactored ActivityDetails seperated into components in folder features/activities/details
+
+```tsx
+    return (
+    <Grid>
+        <Grid.Column width={10}>
+            <ActivityDetailedHeader/>
+            <ActivityDetailedInfo/>
+            <ActivityDetailedChat/>
+        </Grid.Column>
+        <Grid.Column width={6}>
+            <ActivityDetailedSidebar/>
+        </Grid.Column>
+    </Grid>
+)
+})
+```
+
+#### Populating detailed components
+
+- populated from snippets
+
+#### Adding the activity filter component
+
+- created file in dashboard folder ActivityFilters, replaced placeholder h2 from ActivityDashboard with ActivityFilters
+
+- npm install react-calendar
+
+```tsx
+    export default function ActivityFilters() {
+    return (
+        <><Menu vertical size='large' style={{width: '100%', marginTop: '25'}}>
+            <Header icon='filter' attached color='teal' content='Filters'/>
+            <Menu.Item content='All Activities'/>
+            <Menu.Item content="I'm going"/>
+            <Menu.Item content="I'm hosting"/>
+        </Menu>
+            <Header/>
+            <Calendar/>
+        </>
+    )
+}
+```
+
+#### Styling the homepage
+
+- changes in styles.css
+
+```tsx
+export default function HomePage() {
+    return (
+        <Segment inverted textAlign='center' vertical className='masthead'>
+            <Container text>
+                <Header as='h1' inverted>
+                    <Image size='massive' src='assets/logo.png' alt='logo' style={{marginBottom: 12}}/>
+                    Reactivities
+                </Header>
+                <Header as='h2' inverted content='Welcome to reactivities'/>
+                <Button as={Link} to='/activities' size='huge' inverted>
+                    Take me to the Activities
+                </Button>
+            </Container>
+        </Segment>
+    )
+}
+```
+
+### Error handling
+
+##### Backend Changes
+
+- Created models **AppException** and **Result**
+
+```csharp
+namespace Application.Core
+{
+    public class Result<T>
+    {
+        public bool IsSuccess { get; set; }
+        public T Value { get; set; }
+        public string Error { get; set; }
+
+        public static Result<T> Success(T value) => new Result<T> { IsSuccess = true, Value = value };
+        public static Result<T> Failure(string error) => new Result<T> { IsSuccess = false, Error = error
+
+    public class AppException
+    {
+        public AppException(int statusCode, string message, string details = null)
+        {
+            StatusCode = statusCode;
+            Message = message;
+            Details = details;
+        }
+
+        public int StatusCode { get; set; }
+        public string Message { get; set; }
+        public string Details { get; set; }
+    } };
+    }
+}
+```
+
+- Installed FluentValidation to Core Layer and configured
+  
+  ```csharp
+  namespace Application.Activities
+  {
+      public class ActivityValidator : AbstractValidator<Activity>
+      {
+          public ActivityValidator()
+          {
+              RuleFor(x => x.Title).NotEmpty();
+              RuleFor(x => x.Description).NotEmpty();
+              RuleFor(x => x.Date).NotEmpty();
+              RuleFor(x => x.Category).NotEmpty();
+              RuleFor(x => x.City).NotEmpty();
+              RuleFor(x => x.Venue).NotEmpty();
+          }
+      }
+  }
+  ```
+
+- Made adjustments on ActivityHandlers
+
+```csharp
+  namespace Application.Activities
+  {
+      public class Create
+      {
+          public class Command : IRequest<Result<Unit>>
+          {
+              public Activity Activity { get; set; }
+          }
+
+          public class CommandValidator : AbstractValidator<Command>
+          {
+              public CommandValidator()
+              {
+                  RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+              }
+          }
+
+          public class Handler : IRequestHandler<Command, Result<Unit>>
+          {
+              private readonly DataContext _context;
+              public Handler(DataContext context)
+              {
+                  _context = context;
+              }
+
+              public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+              {
+                  _context.Activities.Add(request.Activity);
+
+                  var result = await _context.SaveChangesAsync() > 0;
+
+                  if (!result) return Result<Unit>.Failure("Failed to create activity");
+
+                  return Result<Unit>.Success(Unit.Value);
+              }
+          }
+      }
+    public class Delete
+    {
+        public class Command : IRequest<Result<Unit>>
+        {
+            public Guid Id { get; set; }
+        }
+
+        public class Handler : IRequestHandler<Command, Result<Unit>>
+        {
+            private readonly DataContext _context;
+            public Handler(DataContext context)
+            {
+                _context = context;
+            }
+
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var activity = await _context.Activities.FindAsync(request.Id);
+
+                // if (activity == null) return null;
+
+                _context.Remove(activity);
+
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if (!result) return Result<Unit>.Failure("Failed to delete the activity");
+
+                return Result<Unit>.Success(Unit.Value);
+            }
+        }
+    }
+    public class Details
+    {
+        public class Query : IRequest<Result<Activity>>
+        {
+            public Guid Id { get; set; }
+        }
+
+        public class Handler : IRequestHandler<Query, Result<Activity>>
+        {
+            private readonly DataContext _context;
+            public Handler(DataContext context)
+            {
+                _context = context;
+            }
+
+            public async Task<Result<Activity>> Handle(Query request, CancellationToken cancellationToken)
+            {
+                var activity = await _context.Activities.FindAsync(request.Id);
+
+                return Result<Activity>.Success(activity);
+            }
+        }
+    }
+  public class Edit
+    {
+        public class Command : IRequest<Result<Unit>>
+        {
+            public Activity Activity { get; set; }
+        }
+
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+            }
+        }
+
+      public class Handler : IRequestHandler<Command, Result<Unit>>
+      {
+          private readonly DataContext _context;
+          private readonly IMapper _mapper;
+          public Handler(DataContext context, IMapper mapper)
+          {
+              _mapper = mapper;
+              _context = context;
+          }
+
+          public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+          {
+              var activity = await _context.Activities.FindAsync(request.Activity.Id);
+
+              if (activity == null) return null;
+
+              _mapper.Map(request.Activity, activity);
+
+              var result = await _context.SaveChangesAsync() > 0;
+
+              if (!result) return Result<Unit>.Failure("Failed to update activity");
+
+              return Result<Unit>.Success(Unit.Value);
+          }
+      }
+  }
+      public class List
+  {
+      public class Query : IRequest<Result<List<Activity>>> { }
+
+      public class Handler : IRequestHandler<Query, Result<List<Activity>>>
+      {
+          private readonly DataContext _context;
+          public Handler(DataContext context)
+          {
+              _context = context;
+          }
+
+          public async Task<Result<List<Activity>>> Handle(Query request, CancellationToken cancellationToken)
+          {
+              return Result<List<Activity>>.Success(await _context.Activities.ToListAsync(cancellationToken));
+          }
+      }
+  }
+}
+```
+
+- Added FluentValidation to startup and Exception Middleware
+  
+  ```csharp
+  public void ConfigureServices(IServiceCollection services)
+  {
+      services.AddControllers().AddFluentValidation(config =>
+      {
+          config.RegisterValidatorsFromAssemblyContaining<Create>();
+      });
+      services.AddApplicationServices(_config);
+  }
+   public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+  {
+      app.UseMiddleware<ExceptionMiddleware>();
+      //...
+  }
+  ```
+
+- Modifications on BaseApiController and ActivitiesController
+
+```csharp
+namespace API.Controllers
+{
+ 
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BaseApiController : ControllerBase
+    {
+        private IMediator _mediator;
+        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices
+            .GetService<IMediator>();
+
+        protected ActionResult HandleResult<T>(Result<T> result)
+        {
+            if (result == null) return NotFound();
+            if (result.IsSuccess && result.Value != null)
+                return Ok(result.Value);
+            if (result.IsSuccess && result.Value == null)
+                return NotFound();
+            return BadRequest(result.Error);
+        }
+    }
+}
+```
