@@ -29,6 +29,7 @@ public class Edit
     {
         private readonly DataContext _context;
         private readonly IUserAccessor _userAccessor;
+
         public Handler(DataContext context, IUserAccessor userAccessor)
         {
             _userAccessor = userAccessor;
@@ -38,7 +39,7 @@ public class Edit
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x =>
-                x.UserName == _userAccessor.GetUsername());
+                x.UserName == _userAccessor.GetUsername(), cancellationToken);
 
             user.Bio = request.Bio ?? user.Bio;
             user.DisplayName = request.DisplayName ?? user.DisplayName;

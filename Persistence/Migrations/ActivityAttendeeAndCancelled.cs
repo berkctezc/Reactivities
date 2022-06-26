@@ -1,7 +1,7 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
 
-#nullable disable
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Persistence.Migrations;
 
@@ -10,9 +10,9 @@ public partial class ActivityAttendeeAndCancelled : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.AlterColumn<string>(
-            name: "Venue",
-            table: "Activities",
-            type: "TEXT",
+            "Venue",
+            "Activities",
+            "TEXT",
             nullable: false,
             defaultValue: "",
             oldClrType: typeof(string),
@@ -20,9 +20,9 @@ public partial class ActivityAttendeeAndCancelled : Migration
             oldNullable: true);
 
         migrationBuilder.AlterColumn<string>(
-            name: "Title",
-            table: "Activities",
-            type: "TEXT",
+            "Title",
+            "Activities",
+            "TEXT",
             nullable: false,
             defaultValue: "",
             oldClrType: typeof(string),
@@ -30,9 +30,9 @@ public partial class ActivityAttendeeAndCancelled : Migration
             oldNullable: true);
 
         migrationBuilder.AlterColumn<string>(
-            name: "Description",
-            table: "Activities",
-            type: "TEXT",
+            "Description",
+            "Activities",
+            "TEXT",
             nullable: false,
             defaultValue: "",
             oldClrType: typeof(string),
@@ -40,9 +40,9 @@ public partial class ActivityAttendeeAndCancelled : Migration
             oldNullable: true);
 
         migrationBuilder.AlterColumn<DateTime>(
-            name: "Date",
-            table: "Activities",
-            type: "TEXT",
+            "Date",
+            "Activities",
+            "TEXT",
             nullable: false,
             defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
             oldClrType: typeof(DateTime),
@@ -50,9 +50,9 @@ public partial class ActivityAttendeeAndCancelled : Migration
             oldNullable: true);
 
         migrationBuilder.AlterColumn<string>(
-            name: "City",
-            table: "Activities",
-            type: "TEXT",
+            "City",
+            "Activities",
+            "TEXT",
             nullable: false,
             defaultValue: "",
             oldClrType: typeof(string),
@@ -60,9 +60,9 @@ public partial class ActivityAttendeeAndCancelled : Migration
             oldNullable: true);
 
         migrationBuilder.AlterColumn<string>(
-            name: "Category",
-            table: "Activities",
-            type: "TEXT",
+            "Category",
+            "Activities",
+            "TEXT",
             nullable: false,
             defaultValue: "",
             oldClrType: typeof(string),
@@ -70,96 +70,96 @@ public partial class ActivityAttendeeAndCancelled : Migration
             oldNullable: true);
 
         migrationBuilder.AddColumn<bool>(
-            name: "IsCancelled",
-            table: "Activities",
-            type: "INTEGER",
+            "IsCancelled",
+            "Activities",
+            "INTEGER",
             nullable: false,
             defaultValue: false);
 
         migrationBuilder.CreateTable(
-            name: "ActivityAttendees",
-            columns: table => new
+            "ActivityAttendees",
+            table => new
             {
-                AppUserId = table.Column<string>(type: "TEXT", nullable: false),
-                ActivityId = table.Column<Guid>(type: "TEXT", nullable: false),
-                IsHost = table.Column<bool>(type: "INTEGER", nullable: false)
+                AppUserId = table.Column<string>("TEXT", nullable: false),
+                ActivityId = table.Column<Guid>("TEXT", nullable: false),
+                IsHost = table.Column<bool>("INTEGER", nullable: false)
             },
             constraints: table =>
             {
                 table.PrimaryKey("PK_ActivityAttendees", x => new {x.AppUserId, x.ActivityId});
                 table.ForeignKey(
-                    name: "FK_ActivityAttendees_Activities_ActivityId",
-                    column: x => x.ActivityId,
-                    principalTable: "Activities",
-                    principalColumn: "Id",
+                    "FK_ActivityAttendees_Activities_ActivityId",
+                    x => x.ActivityId,
+                    "Activities",
+                    "Id",
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
-                    name: "FK_ActivityAttendees_AspNetUsers_AppUserId",
-                    column: x => x.AppUserId,
-                    principalTable: "AspNetUsers",
-                    principalColumn: "Id",
+                    "FK_ActivityAttendees_AspNetUsers_AppUserId",
+                    x => x.AppUserId,
+                    "AspNetUsers",
+                    "Id",
                     onDelete: ReferentialAction.Cascade);
             });
 
         migrationBuilder.CreateIndex(
-            name: "IX_ActivityAttendees_ActivityId",
-            table: "ActivityAttendees",
-            column: "ActivityId");
+            "IX_ActivityAttendees_ActivityId",
+            "ActivityAttendees",
+            "ActivityId");
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropTable(
-            name: "ActivityAttendees");
+            "ActivityAttendees");
 
         migrationBuilder.DropColumn(
-            name: "IsCancelled",
-            table: "Activities");
+            "IsCancelled",
+            "Activities");
 
         migrationBuilder.AlterColumn<string>(
-            name: "Venue",
-            table: "Activities",
-            type: "TEXT",
+            "Venue",
+            "Activities",
+            "TEXT",
             nullable: true,
             oldClrType: typeof(string),
             oldType: "TEXT");
 
         migrationBuilder.AlterColumn<string>(
-            name: "Title",
-            table: "Activities",
-            type: "TEXT",
+            "Title",
+            "Activities",
+            "TEXT",
             nullable: true,
             oldClrType: typeof(string),
             oldType: "TEXT");
 
         migrationBuilder.AlterColumn<string>(
-            name: "Description",
-            table: "Activities",
-            type: "TEXT",
+            "Description",
+            "Activities",
+            "TEXT",
             nullable: true,
             oldClrType: typeof(string),
             oldType: "TEXT");
 
         migrationBuilder.AlterColumn<DateTime>(
-            name: "Date",
-            table: "Activities",
-            type: "TEXT",
+            "Date",
+            "Activities",
+            "TEXT",
             nullable: true,
             oldClrType: typeof(DateTime),
             oldType: "TEXT");
 
         migrationBuilder.AlterColumn<string>(
-            name: "City",
-            table: "Activities",
-            type: "TEXT",
+            "City",
+            "Activities",
+            "TEXT",
             nullable: true,
             oldClrType: typeof(string),
             oldType: "TEXT");
 
         migrationBuilder.AlterColumn<string>(
-            name: "Category",
-            table: "Activities",
-            type: "TEXT",
+            "Category",
+            "Activities",
+            "TEXT",
             nullable: true,
             oldClrType: typeof(string),
             oldType: "TEXT");

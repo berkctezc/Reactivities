@@ -67,23 +67,6 @@ export default class ActivityStore {
         }
     }
 
-    private setActivity = (activity: Activity) => {
-        const user = store.userStore.user;
-        if (user) {
-            activity.isGoing = activity.attendees!.some(
-                a => a.username === user.username
-            )
-            activity.isHost = activity.hostUsername === user.username;
-            activity.host = activity.attendees?.find(x => x.username === activity.hostUsername);
-        }
-        activity.date = new Date(activity.date!);
-        this.activityRegistry.set(activity.id, activity);
-    }
-
-    private getActivity = (id: string) => {
-        return this.activityRegistry.get(id);
-    }
-
     setLoadingInitial = (state: boolean) => {
         this.loadingInitial = state;
     }
@@ -173,5 +156,37 @@ export default class ActivityStore {
         } finally {
             runInAction(() => this.loading = false);
         }
+    }
+
+    updateAttendeeFollowing = (username: string) => {
+        this.activityRegistry.forEach(activity => {
+            activity.attendees.forEach(attendee => {
+                if (attendee.username === username) {
+                    attendee.following ? attendee.followersCount-- : attendee.followersCount++;
+                    attendee.following = !attendee.following;
+                }
+            })
+        })
+    }
+
+    clearSelectedActivity = () => {
+        this.selectedActivity = undefined;
+    }
+
+    private setActivity = (activity: Activity) => {
+        const user = store.userStore.user;
+        if (user) {
+            activity.isGoing = activity.attendees!.some(
+                a => a.username === user.username
+            )
+            activity.isHost = activity.hostUsername === user.username;
+            activity.host = activity.attendees?.find(x => x.username === activity.hostUsername);
+        }
+        activity.date = new Date(activity.date!);
+        this.activityRegistry.set(activity.id, activity);
+    }
+
+    private getActivity = (id: string) => {
+        return this.activityRegistry.get(id);
     }
 }

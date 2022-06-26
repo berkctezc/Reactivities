@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cropper } from 'react-cropper';
+import {Cropper} from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 export default function PhotoWidgetCropper({imagePreview, setCropper}: Props) {
     return (
-        <Cropper 
+        <Cropper
             src={imagePreview}
             style={{height: 200, width: '100%'}}
             initialAspectRatio={1}

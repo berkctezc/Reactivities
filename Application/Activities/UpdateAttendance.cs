@@ -33,12 +33,12 @@ public class UpdateAttendance
         {
             var activity = await _context.Activities
                 .Include(a => a.Attendees).ThenInclude(u => u.AppUser)
-                .SingleOrDefaultAsync(x => x.Id == request.Id);
+                .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (activity == null) return null;
 
             var user = await _context.Users.FirstOrDefaultAsync(x =>
-                x.UserName == _userAccessor.GetUsername());
+                x.UserName == _userAccessor.GetUsername(), cancellationToken);
 
             if (user == null) return null;
 

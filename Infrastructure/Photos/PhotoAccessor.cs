@@ -34,10 +34,7 @@ public class PhotoAccessor : IPhotoAccessor
 
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-            if (uploadResult.Error != null)
-            {
-                throw new Exception(uploadResult.Error.Message);
-            }
+            if (uploadResult.Error != null) throw new Exception(uploadResult.Error.Message);
 
             return new PhotoUploadResult
             {

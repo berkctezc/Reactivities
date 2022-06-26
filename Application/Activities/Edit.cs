@@ -37,7 +37,7 @@ public class Edit
 
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var activity = await _context.Activities.FindAsync(new object?[] {request.Activity.Id}, cancellationToken: cancellationToken);
+            var activity = await _context.Activities.FindAsync(new object?[] {request.Activity.Id}, cancellationToken);
 
             if (activity == null) return null;
 

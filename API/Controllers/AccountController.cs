@@ -16,9 +16,9 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class AccountController : ControllerBase
 {
-    private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly TokenService _tokenService;
+    private readonly UserManager<AppUser> _userManager;
 
     public AccountController(UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager, TokenService tokenService)
@@ -38,10 +38,7 @@ public class AccountController : ControllerBase
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-        if (result.Succeeded)
-        {
-            return CreateUserObject(user);
-        }
+        if (result.Succeeded) return CreateUserObject(user);
 
         return Unauthorized();
     }
@@ -70,10 +67,7 @@ public class AccountController : ControllerBase
 
         var result = await _userManager.CreateAsync(user, registerDto.Password);
 
-        if (result.Succeeded)
-        {
-            return CreateUserObject(user);
-        }
+        if (result.Succeeded) return CreateUserObject(user);
 
         return BadRequest("Problem registering user");
     }
