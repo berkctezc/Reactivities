@@ -50,7 +50,7 @@ public class Add
 
             user.Photos.Add(photo);
 
-            var result = await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
             if (result) return Result<Photo>.Success(photo);
 

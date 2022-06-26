@@ -46,14 +46,14 @@ public class List
                         .Select(u => u.Observer)
                         .ProjectTo<Profile>(_mapper.ConfigurationProvider,
                             new {currentUsername = _userAccessor.GetUsername()})
-                        .ToListAsync();
+                        .ToListAsync(cancellationToken);
                     break;
                 case "following":
                     profiles = await _context.UserFollowings.Where(x => x.Observer.UserName == request.Username)
                         .Select(u => u.Target)
                         .ProjectTo<Profile>(_mapper.ConfigurationProvider,
                             new {currentUsername = _userAccessor.GetUsername()})
-                        .ToListAsync();
+                        .ToListAsync(cancellationToken);
                     break;
             }
 

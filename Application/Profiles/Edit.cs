@@ -46,7 +46,7 @@ public class Edit
 
             _context.Entry(user).State = EntityState.Modified;
 
-            var success = await _context.SaveChangesAsync() > 0;
+            var success = await _context.SaveChangesAsync(cancellationToken) > 0;
 
             if (success) return Result<Unit>.Success(Unit.Value);
 
