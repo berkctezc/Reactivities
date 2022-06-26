@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
+
 [AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
@@ -17,8 +19,9 @@ public class AccountController : ControllerBase
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly TokenService _tokenService;
+
     public AccountController(UserManager<AppUser> userManager,
-    SignInManager<AppUser> signInManager, TokenService tokenService)
+        SignInManager<AppUser> signInManager, TokenService tokenService)
     {
         _tokenService = tokenService;
         _signInManager = signInManager;
@@ -28,7 +31,8 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+        var user = await _userManager.Users.Include(p => p.Photos)
+            .FirstOrDefaultAsync(x => x.Email == loginDto.Email);
 
         if (user == null) return Unauthorized();
 
@@ -50,6 +54,7 @@ public class AccountController : ControllerBase
             ModelState.AddModelError("email", "Email taken");
             return ValidationProblem();
         }
+
         if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Username))
         {
             ModelState.AddModelError("username", "Username taken");
@@ -77,7 +82,8 @@ public class AccountController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
-        var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+        var user = await _userManager.Users.Include(p => p.Photos)
+            .FirstOrDefaultAsync(x => x.Email == User.FindFirstValue(ClaimTypes.Email));
 
         return CreateUserObject(user);
     }
@@ -87,7 +93,7 @@ public class AccountController : ControllerBase
         return new UserDto
         {
             DisplayName = user.DisplayName,
-            Image = null,
+            Image = user?.Photos?.FirstOrDefault(x => x.IsMain)?.Url,
             Token = _tokenService.CreateToken(user),
             Username = user.UserName
         };

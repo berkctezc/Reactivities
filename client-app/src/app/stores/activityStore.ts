@@ -1,9 +1,9 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import {makeAutoObservable, runInAction} from "mobx";
 import agent from "../api/agent";
-import { Activity, ActivityFormValues } from "../models/activity";
-import { format } from 'date-fns';
-import { store } from "./store";
-import { Profile } from "../models/profile";
+import {Activity, ActivityFormValues} from "../models/activity";
+import {format} from 'date-fns';
+import {store} from "./store";
+import {Profile} from "../models/profile";
 
 export default class ActivityStore {
     activityRegistry = new Map<string, Activity>();
@@ -110,7 +110,7 @@ export default class ActivityStore {
             await agent.Activities.update(activity);
             runInAction(() => {
                 if (activity.id) {
-                    let updatedActivity = { ...this.getActivity(activity.id), ...activity }
+                    let updatedActivity = {...this.getActivity(activity.id), ...activity}
                     this.activityRegistry.set(activity.id, updatedActivity as Activity);
                     this.selectedActivity = updatedActivity as Activity;
                 }

@@ -22,6 +22,7 @@ public class UpdateAttendance
     {
         private readonly DataContext _context;
         private readonly IUserAccessor _userAccessor;
+
         public Handler(DataContext context, IUserAccessor userAccessor)
         {
             _userAccessor = userAccessor;

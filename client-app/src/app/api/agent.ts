@@ -1,9 +1,9 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { toast } from 'react-toastify';
-import { history } from '../..';
-import { Activity, ActivityFormValues } from '../models/activity';
-import { User, UserFormValues } from '../models/user';
-import { store } from '../stores/store';
+import axios, {AxiosError, AxiosResponse} from 'axios';
+import {toast} from 'react-toastify';
+import {history} from '../..';
+import {Activity, ActivityFormValues} from '../models/activity';
+import {User, UserFormValues} from '../models/user';
+import {store} from '../stores/store';
 
 const sleep = (delay: number) => {
     return new Promise((resolve) => {
@@ -23,7 +23,7 @@ axios.interceptors.response.use(async response => {
     await sleep(1000);
     return response;
 }, (error: AxiosError) => {
-    const { data, status, config } = error.response!;
+    const {data, status, config} = error.response!;
     switch (status) {
         case 400:
             if (config.method === 'get' && data.errors.hasOwnProperty('id')) {

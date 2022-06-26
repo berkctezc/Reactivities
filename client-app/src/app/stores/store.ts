@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import {createContext, useContext} from "react";
 import ActivityStore from "./activityStore";
 import CommonStore from "./commonStore";
 import ModalStore from "./modalStore";

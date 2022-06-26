@@ -15,6 +15,7 @@ namespace API;
 public class Startup
 {
     private readonly IConfiguration _config;
+
     public Startup(IConfiguration config)
     {
         _config = config;
@@ -24,14 +25,11 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers(opt =>
-        {
-            var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-            opt.Filters.Add(new AuthorizeFilter(policy));
-        })
-            .AddFluentValidation(config =>
-        {
-            config.RegisterValidatorsFromAssemblyContaining<Create>();
-        });
+            {
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            })
+            .AddFluentValidation(config => { config.RegisterValidatorsFromAssemblyContaining<Create>(); });
         services.AddApplicationServices(_config);
         services.AddIdentityServices(_config);
     }
@@ -56,9 +54,6 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-        });
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 }

@@ -551,7 +551,7 @@ export default class ActivitStore {
 ```
 
 - Create an interface store
-  
+
   ```tsx
   
   ```
@@ -1365,7 +1365,7 @@ loadActivity = async (id: string) => {
 -
 
 - Add location to **App.tsx**
-  
+
   ```tsx
   function App() {
     const location = useLocation();
@@ -1449,7 +1449,7 @@ function App() {
 #### Styling the activity list
 
 - moved activity list item out of ActivityList to ActivityListItem
-  
+
   ```tsx
   interface Props {
       activity: Activity
@@ -1496,7 +1496,7 @@ function App() {
 #### Grouping the activities by date
 
 - Added groupedActivities function to activityStore
-  
+
   ```tsx
   get groupedActivities() {
      return Object.entries(
@@ -1535,7 +1535,7 @@ function App() {
 #### Styling the list items
 
 - ActivityListItem refactor, removed Segment and ItemGroup tags from ActivityList
-  
+
   ```tsx
   return (
           <Segment.Group>
@@ -1677,7 +1677,7 @@ namespace Application.Core
 ```
 
 - Installed FluentValidation to Core Layer and configured
-  
+
   ```csharp
   namespace Application.Activities
   {
@@ -1853,7 +1853,7 @@ namespace Application.Core
 ```
 
 - Added FluentValidation to startup and Exception Middleware
-  
+
   ```csharp
   public void ConfigureServices(IServiceCollection services)
   {

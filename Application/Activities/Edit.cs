@@ -28,6 +28,7 @@ public class Edit
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+
         public Handler(DataContext context, IMapper mapper)
         {
             _mapper = mapper;
@@ -36,7 +37,7 @@ public class Edit
 
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var activity = await _context.Activities.FindAsync(new object?[] { request.Activity.Id }, cancellationToken: cancellationToken);
+            var activity = await _context.Activities.FindAsync(new object?[] {request.Activity.Id}, cancellationToken: cancellationToken);
 
             if (activity == null) return null;
 
