@@ -1,46 +1,61 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public class Create
 {
-    public class Create
+    public class Command : IRequest<Result<Unit>>
     {
-        public class Command : IRequest<Result<Unit>>
+        public Activity Activity { get; set; }
+    }
+
+    public class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
         {
-            public Activity Activity { get; set; }
+            RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+        }
+    }
+
+    public class Handler : IRequestHandler<Command, Result<Unit>>
+    {
+        private readonly DataContext _context;
+        private readonly IUserAccessor _userAccessor;
+        public Handler(DataContext context, IUserAccessor userAccessor)
+        {
+            _userAccessor = userAccessor;
+            _context = context;
         }
 
-        public class CommandValidator : AbstractValidator<Command>
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            public CommandValidator()
+            var user = await _context.Users.FirstOrDefaultAsync(x =>
+                x.UserName == _userAccessor.GetUsername());
+
+            var attendee = new ActivityAttendee
             {
-                RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
-            }
-        }
+                AppUser = user,
+                Activity = request.Activity,
+                IsHost = true
+            };
 
-        public class Handler : IRequestHandler<Command, Result<Unit>>
-        {
-            private readonly DataContext _context;
-            public Handler(DataContext context)
-            {
-                _context = context;
-            }
+            request.Activity.Attendees.Add(attendee);
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                _context.Activities.Add(request.Activity);
+            _context.Activities.Add(request.Activity);
 
-                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+            var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result) return Result<Unit>.Failure("Failed to create activity");
+            if (!result) return Result<Unit>.Failure("Failed to create activity");
 
-                return Result<Unit>.Success(Unit.Value);
-            }
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

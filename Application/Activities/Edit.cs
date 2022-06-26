@@ -7,47 +7,46 @@ using FluentValidation;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public class Edit
 {
-    public class Edit
+    public class Command : IRequest<Result<Unit>>
     {
-        public class Command : IRequest<Result<Unit>>
+        public Activity Activity { get; set; }
+    }
+
+    public class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
         {
-            public Activity Activity { get; set; }
+            RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+        }
+    }
+
+    public class Handler : IRequestHandler<Command, Result<Unit>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        public Handler(DataContext context, IMapper mapper)
+        {
+            _mapper = mapper;
+            _context = context;
         }
 
-        public class CommandValidator : AbstractValidator<Command>
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            public CommandValidator()
-            {
-                RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
-            }
-        }
+            var activity = await _context.Activities.FindAsync(new object?[] { request.Activity.Id }, cancellationToken: cancellationToken);
 
-        public class Handler : IRequestHandler<Command, Result<Unit>>
-        {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            public Handler(DataContext context, IMapper mapper)
-            {
-                _mapper = mapper;
-                _context = context;
-            }
+            if (activity == null) return null;
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                var activity = await _context.Activities.FindAsync(new object?[] { request.Activity.Id }, cancellationToken: cancellationToken);
+            _mapper.Map(request.Activity, activity);
 
-                if (activity == null) return null;
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                _mapper.Map(request.Activity, activity);
+            if (!result) return Result<Unit>.Failure("Failed to update activity");
 
-                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
-
-                if (!result) return Result<Unit>.Failure("Failed to update activity");
-
-                return Result<Unit>.Success(Unit.Value);
-            }
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }
