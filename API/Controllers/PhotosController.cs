@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Application.Photos;
-using Microsoft.AspNetCore.Mvc;
+﻿using Application.Photos;
 
 namespace API.Controllers;
 

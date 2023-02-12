@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Application.Profiles;
-using Microsoft.AspNetCore.Mvc;
+﻿using Application.Profiles;
 
 namespace API.Controllers;
 

@@ -1,13 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Application.Core;
-using Application.Interfaces;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
-
-namespace Application.Photos;
+﻿namespace Application.Photos;
 
 public class SetMain
 {

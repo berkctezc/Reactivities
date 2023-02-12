@@ -1,14 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Application.Core;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
-
-namespace Application.Activities;
+﻿namespace Application.Activities;
 
 public class Details
 {

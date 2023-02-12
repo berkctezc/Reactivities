@@ -1,11 +1,4 @@
-﻿using Application.Interfaces;
-using Application.Photos;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-
-namespace Infrastructure.Photos;
+﻿namespace Infrastructure.Photos;
 
 public class PhotoAccessor : IPhotoAccessor
 {

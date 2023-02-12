@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using Application.Activities;
+﻿using Application.Activities;
 using Application.Comments;
 using Application.Profiles;
-using Domain;
 using Profile = AutoMapper.Profile;
 
 namespace Application.Core;

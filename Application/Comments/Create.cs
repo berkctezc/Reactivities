@@ -1,15 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Application.Core;
-using Application.Interfaces;
-using AutoMapper;
-using Domain;
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
-
 namespace Application.Comments;
 
 public partial class Create

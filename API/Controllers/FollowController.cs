@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using Application.Followers;
-using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
