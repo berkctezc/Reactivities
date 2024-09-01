@@ -1,17 +1,16 @@
+using System;
+using System.Threading.Tasks;
 using Application.Comments;
+using MediatR;
+using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR;
 
-public class ChatHub : Hub
+public class ChatHub(IMediator mediator) : Hub
 {
-    private readonly IMediator _mediator;
-
-    public ChatHub(IMediator mediator)
-        => _mediator = mediator;
-
-    public async Task SendComment(Create.Command command)
+	public async Task SendComment(Create.Command command)
     {
-        var comment = await _mediator.Send(command);
+        var comment = await mediator.Send(command);
 
         await Clients.Group(command.ActivityId.ToString())
             .SendAsync("ReceiveComment", comment.Value);
@@ -22,7 +21,7 @@ public class ChatHub : Hub
         var httpContext = Context.GetHttpContext();
         var activityId = httpContext.Request.Query["activityId"];
         await Groups.AddToGroupAsync(Context.ConnectionId, activityId);
-        var result = await _mediator.Send(new Create.List.Query {ActivityId = Guid.Parse(activityId)});
+        var result = await mediator.Send(new Create.List.Query {ActivityId = Guid.Parse(activityId)});
         await Clients.Caller.SendAsync("LoadComments", result.Value);
     }
 }

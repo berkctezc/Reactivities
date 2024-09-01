@@ -1,4 +1,13 @@
-﻿namespace Application.Photos;
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Application.Core;
+using Application.Interfaces;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Persistence;
+
+namespace Application.Photos;
 
 public class SetMain
 {
@@ -23,9 +32,7 @@ public class SetMain
             var user = await _context.Users.Include(p => p.Photos)
                 .FirstOrDefaultAsync(x => x.UserName == _userAccessor.GetUsername(), cancellationToken);
 
-            if (user == null) return null;
-
-            var photo = user.Photos.FirstOrDefault(x => x.Id == request.Id);
+            var photo = user?.Photos.FirstOrDefault(x => x.Id == request.Id);
 
             if (photo == null) return null;
 

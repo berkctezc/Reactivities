@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Domain;
+
 namespace Application.Profiles;
 
 public class Profile

@@ -1,3 +1,6 @@
+using System;
+using Application.Core;
+
 namespace Application.Activities;
 
 public class ActivityParams : PagingParams

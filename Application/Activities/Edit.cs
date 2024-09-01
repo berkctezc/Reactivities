@@ -1,4 +1,13 @@
-﻿namespace Application.Activities;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Application.Core;
+using AutoMapper;
+using Domain;
+using FluentValidation;
+using MediatR;
+using Persistence;
+
+namespace Application.Activities;
 
 public class Edit
 {
@@ -30,15 +39,13 @@ public class Edit
         {
             var activity = await _context.Activities.FindAsync(new object?[] {request.Activity.Id}, cancellationToken);
 
-            if (activity == null) return null;
+            if (activity is null) return null;
 
             _mapper.Map(request.Activity, activity);
 
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-            if (!result) return Result<Unit>.Failure("Failed to update activity");
-
-            return Result<Unit>.Success(Unit.Value);
+            return !result ? Result<Unit>.Failure("Failed to update activity") : Result<Unit>.Success(Unit.Value);
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace Application.Profiles;
+﻿using System;
+using System.Text.Json.Serialization;
+
+namespace Application.Profiles;
 
 public class UserActivityDto
 {

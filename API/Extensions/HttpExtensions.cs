@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+
 namespace API.Extensions;
 
 public static class HttpExtensions
@@ -12,7 +16,7 @@ public static class HttpExtensions
             totalItems,
             totalPages
         };
-        response.Headers.Add("Pagination", JsonSerializer.Serialize(paginationHeader));
-        response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
+        response.Headers.TryAdd("Pagination", JsonSerializer.Serialize(paginationHeader));
+        response.Headers.TryAdd("Access-Control-Expose-Headers", "Pagination");
     }
 }

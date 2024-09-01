@@ -1,4 +1,15 @@
-﻿namespace Application.Photos;
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Application.Core;
+using Application.Interfaces;
+using Domain;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Persistence;
+
+namespace Application.Photos;
 
 public class Add
 {

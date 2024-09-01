@@ -1,4 +1,8 @@
-﻿namespace Infrastructure.Security;
+﻿using System.Security.Claims;
+using Application.Interfaces;
+using Microsoft.AspNetCore.Http;
+
+namespace Infrastructure.Security;
 
 public class UserAccessor : IUserAccessor
 {
