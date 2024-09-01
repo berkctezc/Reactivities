@@ -455,7 +455,8 @@ export interface Activity {
 - Add type to activities useState `const [activities, setActivities] = useState<Activity[]>([]);`
 - remove any from map function. Now we get errors if we made mistakes and get completions.
 - Add type to axios get
-  request `axios.get<Activity[]>('http://localhost:5000/api/activities').then(response=>{setActivities(response.data);})`
+  request
+  `axios.get<Activity[]>('http://localhost:5000/api/activities').then(response=>{setActivities(response.data);})`
   ,
 
 ### Adding a Nav bar
@@ -553,7 +554,7 @@ export default class ActivitStore {
 - Create an interface store
 
   ```tsx
-  
+
   ```
 
 import { createContext, useContext } from 'react';
@@ -1369,7 +1370,7 @@ loadActivity = async (id: string) => {
   ```tsx
   function App() {
     const location = useLocation();
-  
+
     return (
       <>
         <Route exact path='/' component={HomePage} />
@@ -1454,18 +1455,18 @@ function App() {
   interface Props {
       activity: Activity
   }
-  
+
   export default function ActivityListItem({activity}: Props) {
       const { activityStore } = useStore();
       const { deleteActivity, loading } = activityStore;
-  
+
       const [target, setTarget] = useState('');
-  
+
       function handleActivityDelete(e: SyntheticEvent<HTMLButtonElement>, id: string) {
           setTarget(e.currentTarget.name);
           deleteActivity(id);
       }
-  
+
       return (
           <Item key={activity.id}>
               <Item.Content>
@@ -1875,7 +1876,7 @@ namespace Application.Core
 ```csharp
 namespace API.Controllers
 {
- 
+
 
     [ApiController]
     [Route("api/[controller]")]

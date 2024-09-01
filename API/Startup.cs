@@ -16,36 +16,36 @@ namespace API;
 public class Startup(IConfiguration config)
 {
 	public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddControllers(opt =>
-            {
-                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                opt.Filters.Add(new AuthorizeFilter(policy));
-            })
-            .AddFluentValidation(config => { config.RegisterValidatorsFromAssemblyContaining<Create>(); });
-        services.AddApplicationServices(config)
-	        .AddIdentityServices(config);
-    }
+	{
+		services.AddControllers(opt =>
+			{
+				var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+				opt.Filters.Add(new AuthorizeFilter(policy));
+			})
+			.AddFluentValidation(config => { config.RegisterValidatorsFromAssemblyContaining<Create>(); });
+		services.AddApplicationServices(config)
+			.AddIdentityServices(config);
+	}
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-        app.UseMiddleware<ExceptionMiddleware>();
+	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+	{
+		app.UseMiddleware<ExceptionMiddleware>();
 
-        if (env.IsDevelopment())
-            app.UseSwagger()
-	            .UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+		if (env.IsDevelopment())
+			app.UseSwagger()
+				.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
 
-        // app.UseHttpsRedirection();
+		// app.UseHttpsRedirection();
 
-        app.UseAuthorization()
-	        .UseRouting()
-	        .UseCors("CorsPolicy")
-	        .UseAuthentication();
+		app.UseAuthorization()
+			.UseRouting()
+			.UseCors("CorsPolicy")
+			.UseAuthentication();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-            endpoints.MapHub<ChatHub>("/chat");
-        });
-    }
+		app.UseEndpoints(endpoints =>
+		{
+			endpoints.MapControllers();
+			endpoints.MapHub<ChatHub>("/chat");
+		});
+	}
 }
