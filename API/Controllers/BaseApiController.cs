@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Controllers;
 
-[ApiController, Route("api/[controller]")]
+[ApiController, Route("api/[controller]/{username}")]
 public class BaseApiController : ControllerBase
 {
 	private IMediator _mediator;

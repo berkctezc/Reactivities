@@ -9,13 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
-public class TokenService
+public class TokenService(IConfiguration config)
 {
-	private readonly IConfiguration _config;
-
-	public TokenService(IConfiguration config)
-		=> _config = config;
-
 	public string CreateToken(AppUser user)
 	{
 		var claims = new List<Claim>
@@ -25,7 +20,7 @@ public class TokenService
 			new(ClaimTypes.Email, user.Email)
 		};
 
-		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]));
+		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
 		var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
 		var tokenDescriptor = new SecurityTokenDescriptor

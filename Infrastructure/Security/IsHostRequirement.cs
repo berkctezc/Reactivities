@@ -2,6 +2,4 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Infrastructure.Security;
 
-public class IsHostRequirement : IAuthorizationRequirement
-{
-}
+public class IsHostRequirement : IAuthorizationRequirement;
