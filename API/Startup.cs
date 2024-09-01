@@ -23,8 +23,8 @@ public class Startup(IConfiguration config)
                 opt.Filters.Add(new AuthorizeFilter(policy));
             })
             .AddFluentValidation(config => { config.RegisterValidatorsFromAssemblyContaining<Create>(); });
-        services.AddApplicationServices(config);
-        services.AddIdentityServices(config);
+        services.AddApplicationServices(config)
+	        .AddIdentityServices(config);
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
